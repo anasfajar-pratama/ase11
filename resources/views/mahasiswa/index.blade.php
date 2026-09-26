@@ -12,6 +12,12 @@
         <p>{{ session('success') }}</p>
     @endif
 
+    <p>
+        <a href="{{ route('mahasiswa.create') }}">Tambah Mahasiswa</a>
+        |
+        <a href="{{ route('dosen.index') }}">Data Dosen</a>
+    </p>
+
     <table border="1" cellpadding="8" cellspacing="0">
         <thead>
             <tr>

@@ -13,6 +13,14 @@ class Mahasiswa extends Model
 
     protected $table = 'mahasiswa';
 
+    protected $fillable = [
+        'nim',
+        'nama',
+        'jurusan',
+        'email',
+        'angkatan',
+    ];
+
     protected function casts(): array
     {
         return [
