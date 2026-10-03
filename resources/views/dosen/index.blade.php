@@ -5,51 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Dosen</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 1100px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        h1 {
-            margin-bottom: 10px;
-        }
-
-        a {
-            color: #155eef;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th,
-        td {
-            border: 1px solid #999;
-            padding: 10px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        .success {
-            padding: 10px;
-            background-color: #e8f7e8;
-            color: #176b17;
-        }
-
-        form {
-            display: inline;
-        }
-
-        button {
-            cursor: pointer;
-        }
+        @include('partials.style')
     </style>
 </head>
 <body>
@@ -63,6 +19,14 @@
         <a href="{{ route('dosen.create') }}">Tambah Dosen</a>
         |
         <a href="{{ route('mahasiswa.index') }}">Data Mahasiswa</a>
+        |
+        <a href="{{ route('mata-kuliah.index') }}">Mata Kuliah</a>
+        |
+        <a href="{{ route('ruangan.index') }}">Ruangan</a>
+        |
+        <a href="{{ route('kelas.index') }}">Kelas</a>
+        |
+        <a href="{{ route('jadwal-kuliah.index') }}">Jadwal Kuliah</a>
     </p>
 
     <table>
@@ -87,7 +51,7 @@
                     <td>{{ $dsn->email }}</td>
                     <td>{{ $dsn->no_telepon }}</td>
                     <td>
-                        <a href="{{ route('dosen.edit', $dsn->id) }}">Ubah</a>
+                        <a href="{{ route('dosen.edit', $dsn->id) }}" class="btn">Ubah</a>
 
                         <form
                             action="{{ route('dosen.destroy', $dsn->id) }}"

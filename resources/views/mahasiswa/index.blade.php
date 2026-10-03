@@ -4,21 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Mahasiswa</title>
+    <style>
+        @include('partials.style')
+    </style>
 </head>
 <body>
     <h1>Data Mahasiswa</h1>
 
     @if (session('success'))
-        <p>{{ session('success') }}</p>
+        <p class="success">{{ session('success') }}</p>
     @endif
 
     <p>
         <a href="{{ route('mahasiswa.create') }}">Tambah Mahasiswa</a>
         |
         <a href="{{ route('dosen.index') }}">Data Dosen</a>
+        |
+        <a href="{{ route('mata-kuliah.index') }}">Mata Kuliah</a>
+        |
+        <a href="{{ route('ruangan.index') }}">Ruangan</a>
+        |
+        <a href="{{ route('kelas.index') }}">Kelas</a>
+        |
+        <a href="{{ route('jadwal-kuliah.index') }}">Jadwal Kuliah</a>
     </p>
 
-    <table border="1" cellpadding="8" cellspacing="0">
+    <table>
         <thead>
             <tr>
                 <th>No</th>
@@ -27,6 +38,7 @@
                 <th>Jurusan</th>
                 <th>Angkatan</th>
                 <th>Email</th>
+                <th>Kelas</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -39,8 +51,9 @@
                     <td>{{ $mhs->jurusan }}</td>
                     <td>{{ $mhs->angkatan }}</td>
                     <td>{{ $mhs->email }}</td>
+                    <td>{{ $mhs->kelas->nama_kelas ?? '-' }}</td>
                     <td>
-                        <a href="{{ route('mahasiswa.edit', $mhs->id) }}"><button>Ubah</button></a>
+                        <a href="{{ route('mahasiswa.edit', $mhs->id) }}" class="btn">Ubah</a>
 
                         <form
                             action="{{ route('mahasiswa.destroy', $mhs->id) }}"
@@ -56,7 +69,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7">Belum ada data mahasiswa.</td>
+                    <td colspan="8">Belum ada data mahasiswa.</td>
                 </tr>
             @endforelse
         </tbody>

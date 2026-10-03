@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tambah Mahasiswa</title>
+    <style>
+        @include('partials.style')
+        body {
+            max-width: 600px;
+        }
+    </style>
 </head>
 <body>
     <h1>Tambah Mahasiswa</h1>
@@ -44,8 +50,20 @@
             <input type="email" id="email" name="email" value="{{ old('email') }}" maxlength="100">
         </p>
 
+        <p>
+            <label for="kelas_id">Kelas</label><br>
+            <select id="kelas_id" name="kelas_id">
+                <option value="">-- Pilih Kelas --</option>
+                @foreach ($kelas as $k)
+                    <option value="{{ $k->id }}" {{ old('kelas_id') == $k->id ? 'selected' : '' }}>
+                        {{ $k->nama_kelas }}
+                    </option>
+                @endforeach
+            </select>
+        </p>
+
         <button type="submit">Simpan</button>
-        <a href="{{ route('mahasiswa.index') }}">Batal</a>
+        <a href="{{ route('mahasiswa.index') }}" class="btn">Batal</a>
     </form>
 </body>
 </html>

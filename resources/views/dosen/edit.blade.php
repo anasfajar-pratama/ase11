@@ -5,34 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ubah Data Dosen</title>
     <style>
+        @include('partials.style')
         body {
-            font-family: Arial, sans-serif;
             max-width: 600px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        label {
-            display: inline-block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-
-        input {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 9px;
-        }
-
-        button {
-            padding: 9px 14px;
-            cursor: pointer;
-        }
-
-        .errors {
-            padding: 10px 10px 10px 30px;
-            background-color: #ffecec;
-            color: #a40000;
         }
     </style>
 </head>
@@ -77,7 +52,7 @@
         </p>
 
         <button type="submit">Simpan Perubahan</button>
-        <a href="{{ route('dosen.index') }}">Batal</a>
+        <a href="{{ route('dosen.index') }}" class="btn">Batal</a>
     </form>
 </body>
 </html>
