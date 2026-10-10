@@ -18,19 +18,13 @@
         <p class="success">{{ session('success') }}</p>
     @endif
 
-    <p>
-        <a href="{{ route('jadwal-kuliah.create') }}">Tambah Jadwal</a>
-        |
-        <a href="{{ route('dosen.index') }}">Data Dosen</a>
-        |
-        <a href="{{ route('mahasiswa.index') }}">Data Mahasiswa</a>
-        |
-        <a href="{{ route('mata-kuliah.index') }}">Mata Kuliah</a>
-        |
-        <a href="{{ route('ruangan.index') }}">Ruangan</a>
-        |
-        <a href="{{ route('kelas.index') }}">Kelas</a>
-    </p>
+    @include('partials.nav')
+
+    @role('admin')
+        <p>
+            <a href="{{ route('jadwal-kuliah.create') }}" class="btn">Tambah Jadwal</a>
+        </p>
+    @endrole
 
     <table>
         <thead>
@@ -56,18 +50,22 @@
                     <td>{{ $jk->hari }}</td>
                     <td>{{ substr($jk->jam_mulai, 0, 5) }} - {{ substr($jk->jam_selesai, 0, 5) }}</td>
                     <td>
-                        <a href="{{ route('jadwal-kuliah.edit', $jk->id) }}" class="btn">Ubah</a>
+                        @role('admin')
+                            <a href="{{ route('jadwal-kuliah.edit', $jk->id) }}" class="btn">Ubah</a>
 
-                        <form
-                            action="{{ route('jadwal-kuliah.destroy', $jk->id) }}"
-                            method="POST"
-                            style="display: inline"
-                            onsubmit="return confirm('Yakin ingin menghapus jadwal ini?')"
-                        >
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit">Hapus</button>
-                        </form>
+                            <form
+                                action="{{ route('jadwal-kuliah.destroy', $jk->id) }}"
+                                method="POST"
+                                style="display: inline"
+                                onsubmit="return confirm('Yakin ingin menghapus jadwal ini?')"
+                            >
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit">Hapus</button>
+                            </form>
+                        @else
+                            <span>-</span>
+                        @endrole
                     </td>
                 </tr>
             @empty

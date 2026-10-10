@@ -15,19 +15,13 @@
         <p class="success">{{ session('success') }}</p>
     @endif
 
-    <p>
-        <a href="{{ route('mahasiswa.create') }}">Tambah Mahasiswa</a>
-        |
-        <a href="{{ route('dosen.index') }}">Data Dosen</a>
-        |
-        <a href="{{ route('mata-kuliah.index') }}">Mata Kuliah</a>
-        |
-        <a href="{{ route('ruangan.index') }}">Ruangan</a>
-        |
-        <a href="{{ route('kelas.index') }}">Kelas</a>
-        |
-        <a href="{{ route('jadwal-kuliah.index') }}">Jadwal Kuliah</a>
-    </p>
+    @include('partials.nav')
+
+    @role('admin')
+        <p>
+            <a href="{{ route('mahasiswa.create') }}" class="btn">Tambah Mahasiswa</a>
+        </p>
+    @endrole
 
     <table>
         <thead>
@@ -45,7 +39,7 @@
         <tbody>
             @forelse ($mahasiswa as $mhs)
                 <tr>
-                    <td>{{ $loop->iteration }}</td>
+                    <td>{{ $mahasiswa->firstItem() + $loop->index }}</td>
                     <td>{{ $mhs->nim }}</td>
                     <td>{{ $mhs->nama }}</td>
                     <td>{{ $mhs->jurusan }}</td>
@@ -53,18 +47,22 @@
                     <td>{{ $mhs->email }}</td>
                     <td>{{ $mhs->kelas->nama_kelas ?? '-' }}</td>
                     <td>
-                        <a href="{{ route('mahasiswa.edit', $mhs->id) }}" class="btn">Ubah</a>
+                        @role('admin')
+                            <a href="{{ route('mahasiswa.edit', $mhs->id) }}" class="btn">Ubah</a>
 
-                        <form
-                            action="{{ route('mahasiswa.destroy', $mhs->id) }}"
-                            method="POST"
-                            style="display: inline"
-                            onsubmit="return confirm('Yakin ingin menghapus data mahasiswa ini?')"
-                        >
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit">Hapus</button>
-                        </form>
+                            <form
+                                action="{{ route('mahasiswa.destroy', $mhs->id) }}"
+                                method="POST"
+                                style="display: inline"
+                                onsubmit="return confirm('Yakin ingin menghapus data mahasiswa ini?')"
+                            >
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit">Hapus</button>
+                            </form>
+                        @else
+                            <span>-</span>
+                        @endrole
                     </td>
                 </tr>
             @empty
@@ -74,5 +72,7 @@
             @endforelse
         </tbody>
     </table>
+
+    {{ $mahasiswa->links('pagination.custom') }}
 </body>
 </html>

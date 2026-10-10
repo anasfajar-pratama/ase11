@@ -82,3 +82,72 @@ button:hover,
     background-color: #ffecec;
     color: #a40000;
 }
+
+/* Navigasi utama */
+.main-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 16px;
+}
+
+.nav-links a {
+    margin-right: 14px;
+    text-decoration: none;
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-info {
+    font-size: 14px;
+    color: #333;
+}
+
+/* Pagination sederhana */
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 0;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.pagination li span,
+.pagination li a {
+    display: inline-block;
+    padding: 6px 12px;
+    border: 1px solid #999;
+    text-decoration: none;
+    color: #000;
+    background-color: #f0f0f0;
+}
+
+.pagination li a:hover {
+    background-color: #e0e0e0;
+}
+
+.pagination li.active span {
+    background-color: #155eef;
+    border-color: #155eef;
+    color: #fff;
+    font-weight: bold;
+}
+
+.pagination li.disabled span {
+    color: #999;
+    background-color: #f7f7f7;
+    cursor: not-allowed;
+}

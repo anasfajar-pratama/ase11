@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Shell(php -v)",
+      "Shell(composer:*)",
+      "Shell(php artisan vendor:publish --provider=\"Spatie\\Permission\\PermissionServiceProvider\" --no-interaction)",
+      "Shell(ls vendor/spatie/laravel-permission 2>&1; echo \"---config---\"; ls config/permission.php 2>&1; echo \"---composer.json spatie---\"; grep -i spatie composer.json)",
+      "Shell(php artisan package:discover --no-interaction)",
+      "Shell(php artisan vendor:publish --tag=permission-config --no-interaction)",
+      "Shell(php artisan vendor:publish --tag=permission-migrations --no-interaction)",
+      "Shell(php artisan --version)",
+      "Shell(php artisan make:controller AuthController --no-interaction)",
+      "Shell(php artisan make:seeder RolePermissionSeeder --no-interaction)",
+      "Shell(php artisan make:seeder MahasiswaPerKelasSeeder --no-interaction)",
+      "Shell(php artisan migrate --no-interaction)",
+      "Shell(php artisan db:seed --class=RolePermissionSeeder --no-interaction)",
+      "Shell(php artisan db:seed --class=MahasiswaPerKelasSeeder --no-interaction)",
+      "Shell(php artisan tinker --execute=\"echo 'mahasiswa='.\\App\\Models\\Mahasiswa::count().' kelas='.\\App\\Models\\Kelas::count().' ase11='.\\App\\Models\\Mahasiswa::whereHas('kelas',fn($q)=>$q->where('nama_kelas','ase11'))->count().' ase12='.\\App\\Models\\Mahasiswa::whereHas('kelas',fn($q)=>$q->where('nama_kelas','ase12'))->count().' roles='.\\Spatie\\Permission\\Models\\Role::count().' perms='.\\Spatie\\Permission\\Models\\Permission::count().' users='.\\App\\Models\\User::count().' adminRoles='.optional(\\App\\Models\\User::where('email','admin@example.test')->first())->getRoleNames()->implode(',');\")",
+      "Shell(php artisan route:list --path=mahasiswa --no-interaction)",
+      "Shell(php artisan route:list --path=mahasiswa -v --no-interaction)",
+      "Shell(php artisan optimize:clear --no-interaction)",
+      "Shell(php artisan permission:cache-reset --no-interaction)",
+      "Shell(php artisan serve --host=127.0.0.1 --port=8000 --no-interaction)",
+      "Shell(curl -s -i -o - http://127.0.0.1:8000/mahasiswa 2 >& 1)",
+      "Shell(findstr:*)",
+      "powershell",
+      "Shell(php artisan view:cache --no-interaction)",
+      "Shell(php artisan view:clear --no-interaction)",
+      "Shell(php artisan test --no-interaction)",
+      "Shell(php artisan test)"
+    ],
+    "deny": [],
+    "defaultMode": "default"
+  }
+}

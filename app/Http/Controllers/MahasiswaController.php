@@ -13,7 +13,10 @@ class MahasiswaController extends Controller
 {
     public function index(): View
     {
-        $mahasiswa = Mahasiswa::with('kelas')->get();
+        $mahasiswa = Mahasiswa::with('kelas')
+            ->orderBy('id')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('mahasiswa.index', compact('mahasiswa'));
     }

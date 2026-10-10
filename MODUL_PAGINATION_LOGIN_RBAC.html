@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modul Implementasi - Pagination, Login &amp; RBAC</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background-color: #f6f8fa;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #24292f;
+  }
+  .container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 40px 48px;
+    background: #fff;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+  }
+  h1 {
+    font-size: 30px;
+    border-bottom: 2px solid #e1e4e8;
+    padding-bottom: 12px;
+    margin-top: 0;
+  }
+  h2 {
+    font-size: 22px;
+    border-bottom: 1px solid #e1e4e8;
+    padding-bottom: 8px;
+    margin-top: 36px;
+  }
+  h3 { font-size: 17px; margin-top: 26px; }
+  .meta { color: #57606a; font-size: 14px; margin-bottom: 8px; }
+  a { color: #0366d6; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    background: #f0f1f3;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  pre {
+    background: #f6f8fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    /* Kode tidak bisa diseleksi / di-copy */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  th, td { border: 1px solid #dfe2e5; padding: 8px 12px; text-align: left; vertical-align: top; }
+  th { background: #f6f8fa; font-weight: 600; }
+  tr:nth-child(even) td { background: #fbfcfd; }
+  ol.toc { columns: 2; column-gap: 40px; }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: #fff;
+  }
+  .badge-new { background: #2da44e; }
+  .badge-updated { background: #ff9800; }
+  .note {
+    background: #fff8c5;
+    border: 1px solid #d4a72c66;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 14px 0;
+  }
+  .step {
+    border-left: 3px solid #0366d6;
+    padding-left: 16px;
+    margin: 22px 0;
+  }
+  footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid #e1e4e8;
+    color: #57606a;
+    font-size: 13px;
+  }
+  @media print { body { background: #fff; } .container { border: none; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Modul Implementasi: Pagination, Login &amp; RBAC</h1>
+<p class="meta"><strong>Project:</strong> belajar-laravel (Simulasi Penjadwalan Kuliah)</p>
+<p class="meta"><strong>Stack:</strong> Laravel 12 &middot; PHP 8.2 &middot; MySQL &middot; spatie/laravel-permission 6.x</p>
+<p class="meta"><strong>Tanggal:</strong> 3 Oktober 2026</p>
+
+<h2 id="pendahuluan">Pendahuluan</h2>
+<p>
+Modul ini menambahkan tiga fitur pada aplikasi CRUD penjadwalan kuliah yang sudah ada:
+</p>
+<ol>
+  <li><strong>Seeder data mahasiswa</strong> &mdash; membuat kelas <code>ase11</code> dan <code>ase12</code>, lalu mengisi masing-masing 25 mahasiswa (total 50 data) agar pagination terlihat nyata.</li>
+  <li><strong>Pagination sederhana</strong> pada tabel mahasiswa &mdash; 10 baris per halaman, tanpa framework CSS tambahan.</li>
+  <li><strong>Login + RBAC</strong> dengan package <code>spatie/laravel-permission</code> &mdash; semua halaman wajib login; role <code>admin</code> bisa CRUD penuh, role <code>mahasiswa</code> hanya bisa melihat data (read-only).</li>
+</ol>
+<p>
+Prinsip yang dipakai: <em>fokus pada fungsi, tampilan sederhana dan rapi</em>. Setiap view tetap berupa
+halaman HTML mandiri yang memakai CSS bersama melalui <code>@include('partials.style')</code>, mengikuti pola proyek yang sudah ada.
+</p>
+
+<h2 id="daftar-isi">Daftar Isi</h2>
+<ol class="toc">
+  <li><a href="#prasyarat">Prasyarat</a></li>
+  <li><a href="#langkah">Langkah Implementasi</a></li>
+  <li><a href="#file-baru">Daftar File Baru</a></li>
+  <li><a href="#file-berubah">Daftar File yang Berubah</a></li>
+  <li><a href="#perintah">Ringkasan Perintah</a></li>
+  <li><a href="#struktur-rbac">Struktur Tabel RBAC</a></li>
+  <li><a href="#uji">Akun Default &amp; Cara Uji</a></li>
+</ol>
+
+<h2 id="prasyarat">Prasyarat</h2>
+<ul>
+  <li>Aplikasi CRUD (mahasiswa, dosen, mata kuliah, ruangan, kelas, jadwal kuliah) sudah berjalan.</li>
+  <li>Database MySQL <code>db_ase11</code> aktif dan sudah di-<code>migrate</code>.</li>
+  <li>PHP &ge; 8.2 dan Composer tersedia.</li>
+</ul>
+
+<h2 id="langkah">Langkah Implementasi</h2>
+
+<div class="step">
+<h3>1. Install package RBAC (Spatie)</h3>
+<p>Jalankan perintah berikut di root proyek:</p>
+<pre><code>composer require spatie/laravel-permission</code></pre>
+<p>
+Versi 8.x membutuhkan PHP 8.3; karena environment memakai PHP 8.2, Composer otomatis memasang
+versi <strong>6.25.0</strong> yang kompatibel dengan Laravel 12.
+</p>
+<p>Lalu publish config dan migration-nya:</p>
+<pre><code>php artisan vendor:publish --tag=permission-config
+php artisan vendor:publish --tag=permission-migrations</code></pre>
+<p>
+Hasilnya: <code>config/permission.php</code> dan migration
+<code>database/migrations/2026_10_03_014705_create_permission_tables.php</code>.
+</p>
+<p>Source code migration <code>database/migrations/2026_10_03_014705_create_permission_tables.php</code> (hasil publish Spatie):</p>
+<pre><code>&lt;?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        $teams = config('permission.teams');
+        $tableNames = config('permission.table_names');
+        $columnNames = config('permission.column_names');
+        $pivotRole = $columnNames['role_pivot_key'] ?? 'role_id';
+        $pivotPermission = $columnNames['permission_pivot_key'] ?? 'permission_id';
+
+        throw_if(empty($tableNames), Exception::class, 'Error: config/permission.php not loaded. Run [php artisan config:clear] and try again.');
+        throw_if($teams &amp;&amp; empty($columnNames['team_foreign_key'] ?? null), Exception::class, 'Error: team_foreign_key on config/permission.php not loaded. Run [php artisan config:clear] and try again.');
+
+        Schema::create($tableNames['permissions'], static function (Blueprint $table) {
+            // $table-&gt;engine('InnoDB');
+            $table-&gt;bigIncrements('id'); // permission id
+            $table-&gt;string('name');       // For MyISAM use string('name', 225); // (or 166 for InnoDB with Redundant/Compact row format)
+            $table-&gt;string('guard_name'); // For MyISAM use string('guard_name', 25);
+            $table-&gt;timestamps();
+
+            $table-&gt;unique(['name', 'guard_name']);
+        });
+
+        Schema::create($tableNames['roles'], static function (Blueprint $table) use ($teams, $columnNames) {
+            // $table-&gt;engine('InnoDB');
+            $table-&gt;bigIncrements('id'); // role id
+            if ($teams || config('permission.testing')) { // permission.testing is a fix for sqlite testing
+                $table-&gt;unsignedBigInteger($columnNames['team_foreign_key'])-&gt;nullable();
+                $table-&gt;index($columnNames['team_foreign_key'], 'roles_team_foreign_key_index');
+            }
+            $table-&gt;string('name');       // For MyISAM use string('name', 225); // (or 166 for InnoDB with Redundant/Compact row format)
+            $table-&gt;string('guard_name'); // For MyISAM use string('guard_name', 25);
+            $table-&gt;timestamps();
+            if ($teams || config('permission.testing')) {
+                $table-&gt;unique([$columnNames['team_foreign_key'], 'name', 'guard_name']);
+            } else {
+                $table-&gt;unique(['name', 'guard_name']);
+            }
+        });
+
+        Schema::create($tableNames['model_has_permissions'], static function (Blueprint $table) use ($tableNames, $columnNames, $pivotPermission, $teams) {
+            $table-&gt;unsignedBigInteger($pivotPermission);
+
+            $table-&gt;string('model_type');
+            $table-&gt;unsignedBigInteger($columnNames['model_morph_key']);
+            $table-&gt;index([$columnNames['model_morph_key'], 'model_type'], 'model_has_permissions_model_id_model_type_index');
+
+            $table-&gt;foreign($pivotPermission)
+                -&gt;references('id') // permission id
+                -&gt;on($tableNames['permissions'])
+                -&gt;onDelete('cascade');
+            if ($teams) {
+                $table-&gt;unsignedBigInteger($columnNames['team_foreign_key']);
+                $table-&gt;index($columnNames['team_foreign_key'], 'model_has_permissions_team_foreign_key_index');
+
+                $table-&gt;primary([$columnNames['team_foreign_key'], $pivotPermission, $columnNames['model_morph_key'], 'model_type'],
+                    'model_has_permissions_permission_model_type_primary');
+            } else {
+                $table-&gt;primary([$pivotPermission, $columnNames['model_morph_key'], 'model_type'],
+                    'model_has_permissions_permission_model_type_primary');
+            }
+
+        });
+
+        Schema::create($tableNames['model_has_roles'], static function (Blueprint $table) use ($tableNames, $columnNames, $pivotRole, $teams) {
+            $table-&gt;unsignedBigInteger($pivotRole);
+
+            $table-&gt;string('model_type');
+            $table-&gt;unsignedBigInteger($columnNames['model_morph_key']);
+            $table-&gt;index([$columnNames['model_morph_key'], 'model_type'], 'model_has_roles_model_id_model_type_index');
+
+            $table-&gt;foreign($pivotRole)
+                -&gt;references('id') // role id
+                -&gt;on($tableNames['roles'])
+                -&gt;onDelete('cascade');
+            if ($teams) {
+                $table-&gt;unsignedBigInteger($columnNames['team_foreign_key']);
+                $table-&gt;index($columnNames['team_foreign_key'], 'model_has_roles_team_foreign_key_index');
+
+                $table-&gt;primary([$columnNames['team_foreign_key'], $pivotRole, $columnNames['model_morph_key'], 'model_type'],
+                    'model_has_roles_role_model_type_primary');
+            } else {
+                $table-&gt;primary([$pivotRole, $columnNames['model_morph_key'], 'model_type'],
+                    'model_has_roles_role_model_type_primary');
+            }
+        });
+
+        Schema::create($tableNames['role_has_permissions'], static function (Blueprint $table) use ($tableNames, $pivotRole, $pivotPermission) {
+            $table-&gt;unsignedBigInteger($pivotPermission);
+            $table-&gt;unsignedBigInteger($pivotRole);
+
+            $table-&gt;foreign($pivotPermission)
+                -&gt;references('id') // permission id
+                -&gt;on($tableNames['permissions'])
+                -&gt;onDelete('cascade');
+
+            $table-&gt;foreign($pivotRole)
+                -&gt;references('id') // role id
+                -&gt;on($tableNames['roles'])
+                -&gt;onDelete('cascade');
+
+            $table-&gt;primary([$pivotPermission, $pivotRole], 'role_has_permissions_permission_id_role_id_primary');
+        });
+
+        app('cache')
+            -&gt;store(config('permission.cache.store') != 'default' ? config('permission.cache.store') : null)
+            -&gt;forget(config('permission.cache.key'));
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        $tableNames = config('permission.table_names');
+
+        throw_if(empty($tableNames), Exception::class, 'Error: config/permission.php not found and defaults could not be merged. Please publish the package configuration before proceeding, or drop the tables manually.');
+
+        Schema::drop($tableNames['role_has_permissions']);
+        Schema::drop($tableNames['model_has_roles']);
+        Schema::drop($tableNames['model_has_permissions']);
+        Schema::drop($tableNames['roles']);
+        Schema::drop($tableNames['permissions']);
+    }
+};</code></pre>
+<div class="note">
+Jika provider belum terbaca (class <code>Spatie\Permission\PermissionServiceProvider</code> not found),
+jalankan <code>composer dump-autoload</code> lalu <code>php artisan package:discover</code>.
+</div>
+</div>
+
+<div class="step">
+<h3>2. Tambahkan trait <code>HasRoles</code> ke model User</h3>
+<p><strong>File:</strong> <code>app/Models/User.php</code> <span class="badge badge-updated">Updated</span></p>
+<pre><code>use Spatie\Permission\Traits\HasRoles;
+
+class User extends Authenticatable
+{
+    use HasFactory, Notifiable, HasRoles;
+    // ...
+}</code></pre>
+<p>Trait ini memberi method seperti <code>assignRole()</code>, <code>hasRole()</code>, dan <code>getRoleNames()</code>.</p>
+</div>
+
+<div class="step">
+<h3>3. Daftarkan middleware Spatie</h3>
+<p><strong>File:</strong> <code>bootstrap/app.php</code> <span class="badge badge-updated">Updated</span></p>
+<pre><code>-&gt;withMiddleware(function (Middleware $middleware): void {
+    // User yang sudah login diarahkan ke halaman mahasiswa
+    $middleware-&gt;redirectUsersTo(fn () =&gt; route('mahasiswa.index'));
+
+    $middleware-&gt;alias([
+        'role'               =&gt; \Spatie\Permission\Middleware\RoleMiddleware::class,
+        'permission'         =&gt; \Spatie\Permission\Middleware\PermissionMiddleware::class,
+        'role_or_permission' =&gt; \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+    ]);
+})</code></pre>
+<p>Alias <code>role</code> inilah yang dipakai di route untuk membatasi akses admin.</p>
+</div>
+
+<div class="step">
+<h3>4. Buat AuthController + view login + navigasi</h3>
+<p><strong>File baru:</strong> <code>app/Http/Controllers/AuthController.php</code> <span class="badge badge-new">New</span></p>
+<pre><code>public function showLoginForm(): View
+{
+    return view('auth.login');
+}
+
+public function login(Request $request): RedirectResponse
+{
+    $credentials = $request-&gt;validate([
+        'email'    =&gt; ['required', 'email'],
+        'password' =&gt; ['required'],
+    ]);
+
+    if (Auth::attempt($credentials, $request-&gt;boolean('remember'))) {
+        $request-&gt;session()-&gt;regenerate();
+        return redirect()-&gt;intended(route('mahasiswa.index'));
+    }
+
+    throw ValidationException::withMessages([
+        'email' =&gt; ['Email atau password salah.'],
+    ]);
+}
+
+public function logout(Request $request): RedirectResponse
+{
+    Auth::logout();
+    $request-&gt;session()-&gt;invalidate();
+    $request-&gt;session()-&gt;regenerateToken();
+    return redirect()-&gt;route('login');
+}</code></pre>
+
+<p><strong>File baru:</strong> <code>resources/views/auth/login.blade.php</code> <span class="badge badge-new">New</span>
+&mdash; form login sederhana (email, password, ingat saya) memakai <code>@include('partials.style')</code>.</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="id"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Login&lt;/title&gt;
+    &lt;style&gt;
+        @include('partials.style')
+
+        /* Penyesuaian khusus halaman login */
+        .login-box {
+            max-width: 400px;
+            margin: 60px auto;
+            padding: 24px;
+            border: 1px solid #999;
+            border-radius: 6px;
+            background-color: #fafafa;
+        }
+
+        .login-box h1 {
+            margin-top: 0;
+            font-size: 22px;
+        }
+
+        .login-box form {
+            display: block;
+        }
+
+        .login-box .field {
+            margin-bottom: 16px;
+        }
+
+        .login-box button {
+            width: 100%;
+        }
+
+        .remember {
+            font-weight: normal;
+        }
+
+        .hint {
+            margin-top: 16px;
+            font-size: 13px;
+            color: #555;
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class="login-box"&gt;
+        &lt;h1&gt;Login&lt;/h1&gt;
+
+        @if ($errors-&gt;any())
+            &lt;ul class="errors"&gt;
+                @foreach ($errors-&gt;all() as $error)
+                    &lt;li&gt;{{ $error }}&lt;/li&gt;
+                @endforeach
+            &lt;/ul&gt;
+        @endif
+
+        &lt;form method="POST" action="{{ route('login') }}"&gt;
+            @csrf
+
+            &lt;div class="field"&gt;
+                &lt;label for="email"&gt;Email&lt;/label&gt;
+                &lt;input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value="{{ old('email') }}"
+                    required
+                    autofocus
+                &gt;
+            &lt;/div&gt;
+
+            &lt;div class="field"&gt;
+                &lt;label for="password"&gt;Password&lt;/label&gt;
+                &lt;input
+                    type="password"
+                    id="password"
+                    name="password"
+                    required
+                &gt;
+            &lt;/div&gt;
+
+            &lt;div class="field"&gt;
+                &lt;label class="remember"&gt;
+                    &lt;input type="checkbox" name="remember"&gt;
+                    Ingat saya
+                &lt;/label&gt;
+            &lt;/div&gt;
+
+            &lt;button type="submit"&gt;Masuk&lt;/button&gt;
+        &lt;/form&gt;
+
+        &lt;p class="hint"&gt;
+            Akun uji coba:&lt;br&gt;
+            admin@example.test / password (admin)&lt;br&gt;
+            mahasiswa@example.test / password (read-only)
+        &lt;/p&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+<p><strong>File baru:</strong> <code>resources/views/partials/nav.blade.php</code> <span class="badge badge-new">New</span>
+&mdash; navigasi bersama yang menampilkan nama user + role dan tombol logout:</p>
+<pre><code>@auth
+    &lt;span class="user-info"&gt;
+        {{ auth()-&gt;user()-&gt;name }}
+        ({{ auth()-&gt;user()-&gt;getRoleNames()-&gt;implode(', ') }})
+    &lt;/span&gt;
+    &lt;form method="POST" action="{{ route('logout') }}"&gt;
+        @csrf
+        &lt;button type="submit"&gt;Logout&lt;/button&gt;
+    &lt;/form&gt;
+@endauth</code></pre>
+</div>
+
+<div class="step">
+<h3>5. Atur route: login + proteksi RBAC</h3>
+<p><strong>File:</strong> <code>routes/web.php</code> <span class="badge badge-updated">Updated</span></p>
+<pre><code>// Route login (hanya tamu)
+Route::middleware('guest')-&gt;group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginForm'])-&gt;name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+});
+Route::post('/logout', [AuthController::class, 'logout'])
+    -&gt;middleware('auth')-&gt;name('logout');
+
+// KHUSUS ADMIN (create, store, edit, update, destroy)
+Route::middleware(['auth', 'role:admin'])-&gt;group(function () {
+    Route::resource('mahasiswa', MahasiswaController::class)-&gt;except(['index', 'show']);
+    // ... resource lainnya
+});
+
+// SEMUA USER LOGIN (read-only: index &amp; show)
+Route::middleware('auth')-&gt;group(function () {
+    Route::resource('mahasiswa', MahasiswaController::class)-&gt;only(['index', 'show']);
+    // ... resource lainnya
+});</code></pre>
+<div class="note">
+<strong>Penting (urutan route):</strong> grup <code>role:admin</code> didaftarkan <em>lebih dulu</em> agar route
+<code>create</code> (<code>mahasiswa/create</code>) terdaftar sebelum route <code>show</code>
+(<code>mahasiswa/{mahasiswa}</code>). Jika tidak, <code>GET mahasiswa/create</code> akan ditangkap
+route <code>show</code> dengan parameter <code>{mahasiswa} = "create"</code>.
+</div>
+</div>
+
+<div class="step">
+<h3>6. Seeder role, permission, dan user default</h3>
+<p><strong>File baru:</strong> <code>database/seeders/RolePermissionSeeder.php</code> <span class="badge badge-new">New</span></p>
+<pre><code>// Permission dasar
+$permissions = ['lihat-data', 'tambah-data', 'ubah-data', 'hapus-data'];
+foreach ($permissions as $p) { Permission::firstOrCreate(['name' =&gt; $p]); }
+
+// Role admin -&gt; semua permission
+$roleAdmin = Role::firstOrCreate(['name' =&gt; 'admin']);
+$roleAdmin-&gt;syncPermissions($permissions);
+
+// Role mahasiswa -&gt; hanya lihat
+$roleMhs = Role::firstOrCreate(['name' =&gt; 'mahasiswa']);
+$roleMhs-&gt;syncPermissions(['lihat-data']);
+
+// User default (password otomatis di-hash oleh cast 'hashed')
+User::firstOrCreate(['email' =&gt; 'admin@example.test'],
+    ['name' =&gt; 'Administrator', 'password' =&gt; 'password'])-&gt;syncRoles(['admin']);
+User::firstOrCreate(['email' =&gt; 'mahasiswa@example.test'],
+    ['name' =&gt; 'Mahasiswa Demo', 'password' =&gt; 'password'])-&gt;syncRoles(['mahasiswa']);</code></pre>
+</div>
+
+<div class="step">
+<h3>7. Seeder kelas &amp; 25 mahasiswa per kelas</h3>
+<p><strong>File baru:</strong> <code>database/seeders/MahasiswaPerKelasSeeder.php</code> <span class="badge badge-new">New</span></p>
+<pre><code>$kelasList = [
+    'ase11' =&gt; ['kode' =&gt; '1', 'angkatan' =&gt; 2026, 'jurusan' =&gt; 'Informatika'],
+    'ase12' =&gt; ['kode' =&gt; '2', 'angkatan' =&gt; 2026, 'jurusan' =&gt; 'Informatika'],
+];
+
+foreach ($kelasList as $namaKelas =&gt; $meta) {
+    $kelas = Kelas::firstOrCreate(
+        ['nama_kelas' =&gt; $namaKelas],
+        ['angkatan' =&gt; $meta['angkatan'], 'jurusan' =&gt; $meta['jurusan']]
+    );
+
+    for ($i = 1; $i &lt;= 25; $i++) {
+        $nim = '2026' . $meta['kode'] . str_pad((string) $i, 3, '0', STR_PAD_LEFT);
+        Mahasiswa::firstOrCreate(['nim' =&gt; $nim], [
+            'nama'     =&gt; fake()-&gt;name(),
+            'jurusan'  =&gt; $meta['jurusan'],
+            'email'    =&gt; fake()-&gt;unique()-&gt;safeEmail(),
+            'angkatan' =&gt; $meta['angkatan'],
+            'kelas_id' =&gt; $kelas-&gt;id,
+        ]);
+    }
+}</code></pre>
+<p>
+NIM dibentuk unik per kelas: <code>20261001</code>&ndash;<code>20261025</code> (ase11) dan
+<code>20262001</code>&ndash;<code>20262025</code> (ase12). <code>firstOrCreate</code> membuat seeder aman dijalankan ulang.
+</p>
+</div>
+
+<div class="step">
+<h3>8. Pagination pada tabel mahasiswa</h3>
+<p><strong>File:</strong> <code>app/Http/Controllers/MahasiswaController.php</code> <span class="badge badge-updated">Updated</span></p>
+<pre><code>public function index(): View
+{
+    $mahasiswa = Mahasiswa::with('kelas')
+        -&gt;orderBy('id')
+        -&gt;paginate(10)
+        -&gt;withQueryString();
+
+    return view('mahasiswa.index', compact('mahasiswa'));
+}</code></pre>
+
+<p><strong>File baru:</strong> <code>resources/views/pagination/custom.blade.php</code> <span class="badge badge-new">New</span>
+&mdash; view pagination sederhana (tombol sebelumnya, nomor halaman, tombol berikutnya) memakai class <code>.pagination</code>.</p>
+
+<p><strong>File:</strong> <code>resources/views/mahasiswa/index.blade.php</code> <span class="badge badge-updated">Updated</span></p>
+<pre><code>// Nomor urut tetap lanjutan antar-halaman
+&lt;td&gt;{{ $mahasiswa-&gt;firstItem() + $loop-&gt;index }}&lt;/td&gt;
+
+// Tombol tulis hanya untuk admin
+@role('admin')
+    &lt;a href="{{ route('mahasiswa.edit', $mhs-&gt;id) }}" class="btn"&gt;Ubah&lt;/a&gt;
+    ...
+@else
+    &lt;span&gt;-&lt;/span&gt;
+@endrole
+
+// Tautan pagination di bawah tabel
+{{ $mahasiswa-&gt;links('pagination.custom') }}</code></pre>
+
+<p><strong>File:</strong> <code>resources/views/partials/style.blade.php</code> <span class="badge badge-updated">Updated</span>
+&mdash; ditambah CSS <code>secukupnya</code> untuk <code>.main-nav</code> dan <code>.pagination</code> (flex horizontal, halaman aktif ditandai). Berikut source code lengkapnya:</p>
+<pre><code>body {
+    font-family: Arial, sans-serif;
+    max-width: 1100px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+h1 {
+    margin-bottom: 10px;
+}
+
+a {
+    color: #155eef;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th,
+td {
+    border: 1px solid #999;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+.success {
+    padding: 10px;
+    background-color: #e8f7e8;
+    color: #176b17;
+}
+
+form {
+    display: inline;
+}
+
+label {
+    display: inline-block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input,
+select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px;
+}
+
+input[type="checkbox"] {
+    width: auto;
+    padding: 0;
+    margin-right: 6px;
+}
+
+button,
+.btn {
+    padding: 8px 14px;
+    background-color: #f0f0f0;
+    border: 1px solid #999;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    color: #000;
+    text-decoration: none;
+    display: inline-block;
+}
+
+button:hover,
+.btn:hover {
+    background-color: #e0e0e0;
+}
+
+.errors {
+    padding: 10px 10px 10px 30px;
+    background-color: #ffecec;
+    color: #a40000;
+}
+
+/* Navigasi utama */
+.main-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 16px;
+}
+
+.nav-links a {
+    margin-right: 14px;
+    text-decoration: none;
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-info {
+    font-size: 14px;
+    color: #333;
+}
+
+/* Pagination sederhana */
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 0;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.pagination li span,
+.pagination li a {
+    display: inline-block;
+    padding: 6px 12px;
+    border: 1px solid #999;
+    text-decoration: none;
+    color: #000;
+    background-color: #f0f0f0;
+}
+
+.pagination li a:hover {
+    background-color: #e0e0e0;
+}
+
+.pagination li.active span {
+    background-color: #155eef;
+    border-color: #155eef;
+    color: #fff;
+    font-weight: bold;
+}
+
+.pagination li.disabled span {
+    color: #999;
+    background-color: #f7f7f7;
+    cursor: not-allowed;
+}</code></pre>
+</div>
+
+<div class="step">
+<h3>9. Jalankan migration, seeder, dan bersihkan cache</h3>
+<pre><code>php artisan migrate
+php artisan db:seed --class=RolePermissionSeeder
+php artisan db:seed --class=MahasiswaPerKelasSeeder
+php artisan optimize:clear
+php artisan permission:cache-reset</code></pre>
+</div>
+
+<div class="step">
+<h3>10. Uji coba</h3>
+<pre><code>php artisan serve</code></pre>
+<p>Buka <code>http://127.0.0.1:8000</code> dan ikuti skenario uji pada bagian <a href="#uji">Akun Default &amp; Cara Uji</a>.</p>
+</div>
+
+<h2 id="file-baru">Daftar File Baru</h2>
+<table>
+  <thead><tr><th>File</th><th>Keterangan</th></tr></thead>
+  <tbody>
+    <tr><td><code>config/permission.php</code></td><td>Config Spatie (hasil publish).</td></tr>
+    <tr><td><code>database/migrations/2026_10_03_014705_create_permission_tables.php</code></td><td>Migration tabel RBAC (roles, permissions, pivot).</td></tr>
+    <tr><td><code>app/Http/Controllers/AuthController.php</code></td><td>Menangani login, proses login, dan logout.</td></tr>
+    <tr><td><code>resources/views/auth/login.blade.php</code></td><td>Halaman form login.</td></tr>
+    <tr><td><code>resources/views/partials/nav.blade.php</code></td><td>Navigasi bersama + info user + tombol logout.</td></tr>
+    <tr><td><code>resources/views/pagination/custom.blade.php</code></td><td>View pagination sederhana (nomor halaman + prev/next).</td></tr>
+    <tr><td><code>database/seeders/RolePermissionSeeder.php</code></td><td>Seeder permission, role (admin &amp; mahasiswa), dan user default.</td></tr>
+    <tr><td><code>database/seeders/MahasiswaPerKelasSeeder.php</code></td><td>Seeder kelas ase11/ase12 + 25 mahasiswa per kelas.</td></tr>
+    <tr><td><code>catatan.md</code></td><td>Catatan seluruh perintah Laravel/Composer yang dijalankan.</td></tr>
+    <tr><td><code>MODUL_PAGINATION_LOGIN_RBAC.html</code></td><td>Modul implementasi ini.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="file-berubah">Daftar File yang Berubah</h2>
+<table>
+  <thead><tr><th>File</th><th>Perubahan</th></tr></thead>
+  <tbody>
+    <tr><td><code>app/Models/User.php</code></td><td>Menambah trait <code>HasRoles</code>.</td></tr>
+    <tr><td><code>bootstrap/app.php</code></td><td>Alias middleware <code>role</code>/<code>permission</code> + <code>redirectUsersTo</code>.</td></tr>
+    <tr><td><code>routes/web.php</code></td><td>Route login/logout; resource dibagi grup <code>auth</code> (read) dan <code>auth</code>+<code>role:admin</code> (write).</td></tr>
+    <tr><td><code>app/Http/Controllers/MahasiswaController.php</code></td><td><code>index()</code> memakai <code>paginate(10)</code>.</td></tr>
+    <tr><td><code>resources/views/mahasiswa/index.blade.php</code></td><td>Nav partial, tombol tulis di-<code>@role('admin')</code>, nomor urut lintas halaman, tautan pagination.</td></tr>
+    <tr><td><code>resources/views/partials/style.blade.php</code></td><td>CSS untuk <code>.main-nav</code> dan <code>.pagination</code>.</td></tr>
+    <tr><td><code>resources/views/dosen/index.blade.php</code></td><td>Nav partial + tombol tulis di-<code>@role('admin')</code> (konsistensi read-only).</td></tr>
+    <tr><td><code>resources/views/mata_kuliah/index.blade.php</code></td><td>Nav partial + tombol tulis di-<code>@role('admin')</code> (konsistensi read-only).</td></tr>
+    <tr><td><code>resources/views/ruangan/index.blade.php</code></td><td>Nav partial + tombol tulis di-<code>@role('admin')</code> (konsistensi read-only).</td></tr>
+    <tr><td><code>resources/views/kelas/index.blade.php</code></td><td>Nav partial + tombol tulis di-<code>@role('admin')</code> (konsistensi read-only).</td></tr>
+    <tr><td><code>resources/views/jadwal_kuliah/index.blade.php</code></td><td>Nav partial + tombol tulis di-<code>@role('admin')</code> (konsistensi read-only).</td></tr>
+    <tr><td><code>database/seeders/DatabaseSeeder.php</code></td><td>Memanggil <code>RolePermissionSeeder</code> dan <code>MahasiswaPerKelasSeeder</code>.</td></tr>
+    <tr><td><code>composer.json</code></td><td>Menambah dependency <code>spatie/laravel-permission</code>.</td></tr>
+    <tr><td><code>composer.lock</code></td><td>Mengunci versi <code>spatie/laravel-permission</code> 6.25.0.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="perintah">Ringkasan Perintah</h2>
+<table>
+  <thead><tr><th>Perintah</th><th>Fungsi</th></tr></thead>
+  <tbody>
+    <tr><td><code>composer require spatie/laravel-permission</code></td><td>Install package RBAC.</td></tr>
+    <tr><td><code>composer dump-autoload</code> / <code>php artisan package:discover</code></td><td>Perbarui autoloader &amp; daftarkan provider.</td></tr>
+    <tr><td><code>php artisan vendor:publish --tag=permission-config</code></td><td>Publish config Spatie.</td></tr>
+    <tr><td><code>php artisan vendor:publish --tag=permission-migrations</code></td><td>Publish migration tabel RBAC.</td></tr>
+    <tr><td><code>php artisan make:controller AuthController</code></td><td>Buat controller login.</td></tr>
+    <tr><td><code>php artisan make:seeder RolePermissionSeeder</code></td><td>Buat seeder role/permission.</td></tr>
+    <tr><td><code>php artisan make:seeder MahasiswaPerKelasSeeder</code></td><td>Buat seeder mahasiswa per kelas.</td></tr>
+    <tr><td><code>php artisan migrate</code></td><td>Buat tabel RBAC.</td></tr>
+    <tr><td><code>php artisan db:seed --class=RolePermissionSeeder</code></td><td>Isi role, permission, user.</td></tr>
+    <tr><td><code>php artisan db:seed --class=MahasiswaPerKelasSeeder</code></td><td>Isi kelas &amp; mahasiswa.</td></tr>
+    <tr><td><code>php artisan optimize:clear</code></td><td>Bersihkan cache config/route/view.</td></tr>
+    <tr><td><code>php artisan permission:cache-reset</code></td><td>Reset cache permission Spatie.</td></tr>
+    <tr><td><code>php artisan route:list --path=mahasiswa -v</code></td><td>Verifikasi route &amp; middleware.</td></tr>
+    <tr><td><code>php artisan serve</code></td><td>Jalankan server development.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="struktur-rbac">Struktur Tabel RBAC (Spatie)</h2>
+<table>
+  <thead><tr><th>Tabel</th><th>Fungsi</th></tr></thead>
+  <tbody>
+    <tr><td><code>roles</code></td><td>Daftar role (admin, mahasiswa).</td></tr>
+    <tr><td><code>permissions</code></td><td>Daftar permission (lihat/tambah/ubah/hapus-data).</td></tr>
+    <tr><td><code>model_has_roles</code></td><td>Relasi user &harr; role.</td></tr>
+    <tr><td><code>model_has_permissions</code></td><td>Relasi user &harr; permission (langsung).</td></tr>
+    <tr><td><code>role_has_permissions</code></td><td>Relasi role &harr; permission.</td></tr>
+  </tbody>
+</table>
+<p>
+Pada modul ini pembatasan akses route memakai <strong>role</strong> (<code>role:admin</code>),
+sedangkan <strong>permission</strong> tetap dibuat dan di-assign ke role sebagai contoh konsep RBAC
+yang bisa dikembangkan lebih lanjut (mis. <code>permission:tambah-data</code>).
+</p>
+
+<h2 id="uji">Akun Default &amp; Cara Uji</h2>
+<table>
+  <thead><tr><th>Email</th><th>Password</th><th>Role</th><th>Akses</th></tr></thead>
+  <tbody>
+    <tr><td><code>admin@example.test</code></td><td><code>password</code></td><td>admin</td><td>Full CRUD</td></tr>
+    <tr><td><code>mahasiswa@example.test</code></td><td><code>password</code></td><td>mahasiswa</td><td>Read-only</td></tr>
+  </tbody>
+</table>
+
+<h3>Skenario uji</h3>
+<ol>
+  <li>Buka <code>/mahasiswa</code> tanpa login &rarr; otomatis diarahkan ke <code>/login</code>.</li>
+  <li>Login sebagai <strong>admin</strong> &rarr; masuk ke <code>/mahasiswa</code>: tombol <em>Tambah/Ubah/Hapus</em> tampil, pagination muncul (10 data per halaman), akses <code>/mahasiswa/create</code> berhasil (200).</li>
+  <li>Logout, lalu login sebagai <strong>mahasiswa</strong> &rarr; tombol <em>Tambah/Ubah/Hapus</em> hilang (kolom Action berisi &ldquo;-&rdquo;), pagination tetap tampil, akses <code>/mahasiswa/create</code> ditolak (403).</li>
+  <li>Klik <strong>Logout</strong> &rarr; kembali ke halaman login.</li>
+</ol>
+
+<footer>
+  <strong>Modul implementasi selesai dibuat pada:</strong> 3 Oktober 2026<br>
+  Sumber perintah lengkap tercatat pada <code>catatan.md</code>.
+</footer>
+
+</div>
+</body>
+</html>

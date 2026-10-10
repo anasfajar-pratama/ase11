@@ -15,19 +15,13 @@
         <p class="success">{{ session('success') }}</p>
     @endif
 
-    <p>
-        <a href="{{ route('kelas.create') }}">Tambah Kelas</a>
-        |
-        <a href="{{ route('dosen.index') }}">Data Dosen</a>
-        |
-        <a href="{{ route('mahasiswa.index') }}">Data Mahasiswa</a>
-        |
-        <a href="{{ route('mata-kuliah.index') }}">Mata Kuliah</a>
-        |
-        <a href="{{ route('ruangan.index') }}">Ruangan</a>
-        |
-        <a href="{{ route('jadwal-kuliah.index') }}">Jadwal Kuliah</a>
-    </p>
+    @include('partials.nav')
+
+    @role('admin')
+        <p>
+            <a href="{{ route('kelas.create') }}" class="btn">Tambah Kelas</a>
+        </p>
+    @endrole
 
     <table>
         <thead>
@@ -47,18 +41,22 @@
                     <td>{{ $k->angkatan }}</td>
                     <td>{{ $k->jurusan }}</td>
                     <td>
-                        <a href="{{ route('kelas.edit', $k->id) }}" class="btn">Ubah</a>
+                        @role('admin')
+                            <a href="{{ route('kelas.edit', $k->id) }}" class="btn">Ubah</a>
 
-                        <form
-                            action="{{ route('kelas.destroy', $k->id) }}"
-                            method="POST"
-                            style="display: inline"
-                            onsubmit="return confirm('Yakin ingin menghapus data kelas ini?')"
-                        >
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit">Hapus</button>
-                        </form>
+                            <form
+                                action="{{ route('kelas.destroy', $k->id) }}"
+                                method="POST"
+                                style="display: inline"
+                                onsubmit="return confirm('Yakin ingin menghapus data kelas ini?')"
+                            >
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit">Hapus</button>
+                            </form>
+                        @else
+                            <span>-</span>
+                        @endrole
                     </td>
                 </tr>
             @empty
