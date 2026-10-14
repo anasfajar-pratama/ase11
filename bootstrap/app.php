@@ -11,8 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Arahkan user yang sudah login (tamu ke route guest) ke halaman mahasiswa.
-        $middleware->redirectUsersTo(fn () => route('mahasiswa.index'));
+        // Arahkan user yang sudah login ke menu pertama yang boleh diaksesnya.
+        $middleware->redirectUsersTo(
+            fn () => auth()->user()?->firstAccessibleMenuUrl() ?? route('login')
+        );
 
         $middleware->alias([
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,

@@ -1,11 +1,15 @@
 <nav class="main-nav">
     <div class="nav-links">
-        <a href="{{ route('mahasiswa.index') }}">Mahasiswa</a>
-        <a href="{{ route('dosen.index') }}">Dosen</a>
-        <a href="{{ route('mata-kuliah.index') }}">Mata Kuliah</a>
-        <a href="{{ route('ruangan.index') }}">Ruangan</a>
-        <a href="{{ route('kelas.index') }}">Kelas</a>
-        <a href="{{ route('jadwal-kuliah.index') }}">Jadwal Kuliah</a>
+        @foreach (config('menu') as $menu)
+            @can($menu['permission'])
+                <a href="{{ route($menu['route']) }}">{{ $menu['label'] }}</a>
+            @endcan
+        @endforeach
+
+        @role('admin')
+            <a href="{{ route('role.index') }}">Role</a>
+            <a href="{{ route('pengguna.index') }}">Pengguna</a>
+        @endrole
     </div>
 
     @auth

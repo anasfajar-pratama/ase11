@@ -18,18 +18,26 @@ class RolePermissionSeeder extends Seeder
         // Reset cache permission agar data terbaru langsung terbaca.
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        // 1. Buat permission dasar.
+        // 1. Buat permission dasar + permission menu (dipakai untuk RBAC per menu).
         $permissions = ['lihat-data', 'tambah-data', 'ubah-data', 'hapus-data'];
-        foreach ($permissions as $permission) {
+
+        $menuPermissions = [
+            'menu-mahasiswa', 'menu-dosen', 'menu-mata-kuliah',
+            'menu-ruangan', 'menu-kelas', 'menu-jadwal-kuliah',
+        ];
+
+        foreach (array_merge($permissions, $menuPermissions) as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
 
         // 2. Buat role dan assigns permission.
+        // Role admin: semua permission + semua menu.
         $roleAdmin = Role::firstOrCreate(['name' => 'admin']);
-        $roleAdmin->syncPermissions($permissions);
+        $roleAdmin->syncPermissions(array_merge($permissions, $menuPermissions));
 
+        // Role mahasiswa: read-only + hanya menu Jadwal Kuliah (contoh, bisa diubah dari UI RBAC Control).
         $roleMahasiswa = Role::firstOrCreate(['name' => 'mahasiswa']);
-        $roleMahasiswa->syncPermissions(['lihat-data']);
+        $roleMahasiswa->syncPermissions(['lihat-data', 'menu-jadwal-kuliah']);
 
         // 3. Buat user default (password otomatis di-hash oleh cast 'hashed' pada model User).
         $admin = User::firstOrCreate(

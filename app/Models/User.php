@@ -47,4 +47,18 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * URL menu pertama yang boleh diakses user (berdasarkan permission menu).
+     */
+    public function firstAccessibleMenuUrl(): string
+    {
+        foreach (config('menu') as $menu) {
+            if ($this->can($menu['permission'])) {
+                return route($menu['route']);
+            }
+        }
+
+        return '/';
+    }
 }
