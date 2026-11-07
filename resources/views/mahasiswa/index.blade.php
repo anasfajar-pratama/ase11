@@ -27,6 +27,7 @@
         <thead>
             <tr>
                 <th>No</th>
+                <th>Foto</th>
                 <th>NIM</th>
                 <th>Nama</th>
                 <th>Jurusan</th>
@@ -40,6 +41,13 @@
             @forelse ($mahasiswa as $mhs)
                 <tr>
                     <td>{{ $mahasiswa->firstItem() + $loop->index }}</td>
+                    <td>
+                        @if ($mhs->foto)
+                            <img src="{{ $mhs->foto_url }}" alt="Foto {{ $mhs->nama }}" class="foto-thumb">
+                        @else
+                            -
+                        @endif
+                    </td>
                     <td>{{ $mhs->nim }}</td>
                     <td>{{ $mhs->nama }}</td>
                     <td>{{ $mhs->jurusan }}</td>
@@ -67,7 +75,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8">Belum ada data mahasiswa.</td>
+                    <td colspan="9">Belum ada data mahasiswa.</td>
                 </tr>
             @endforelse
         </tbody>

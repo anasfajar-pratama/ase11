@@ -133,3 +133,103 @@ php artisan serve
 |-------|----------|------|-------|
 | `admin@example.test` | `password` | admin | Full CRUD |
 | `mahasiswa@example.test` | `password` | mahasiswa | Read-only |
+
+---
+
+# Catatan Perintah — Fitur Upload Foto Mahasiswa (Pertemuan 7)
+
+Dokumen ini juga mencatat perintah untuk menambahkan **upload foto** pada CRUD mahasiswa.
+
+> Tanggal: 23 Oktober 2026 · Library: `intervention/image` 3.11.10
+
+## Urutan Perintah
+
+### 1. Install library Intervention Image
+
+```bash
+composer require intervention/image
+```
+
+- Menginstall `intervention/image` untuk resize dan konversi gambar ke WebP.
+- Composer memilih versi **3.11.10** karena versi 4.x mensyaratkan PHP ^8.3, sedangkan proyek ini memakai PHP 8.2.
+- Ikut terpasang dependency `intervention/gif` 4.2.4.
+
+### 2. Regenerasi autoloader
+
+```bash
+composer dump-autoload --no-scripts
+```
+
+- Memperbarui autoloader agar class `Intervention\Image\*` langsung dikenali (wajib jika proses install terputus).
+
+### 3. Buat migration kolom foto
+
+```bash
+php artisan make:migration add_foto_to_mahasiswa_table --table=mahasiswa
+```
+
+- Membuat `database/migrations/2026_10_23_174328_add_foto_to_mahasiswa_table.php`.
+- Isi: `$table->string('foto')->nullable()->after('email');`
+
+### 4. Jalankan migration
+
+```bash
+php artisan migrate
+```
+
+- Menambahkan kolom `foto` (nullable) pada tabel `mahasiswa`.
+
+### 5. Buat symbolic link storage
+
+```bash
+php artisan storage:link
+```
+
+- Menghubungkan `public/storage` → `storage/app/public`.
+- Tanpa langkah ini, file hasil upload tidak bisa diakses lewat browser.
+
+### 6. Bersihkan cache
+
+```bash
+php artisan optimize:clear
+```
+
+- Membersihkan cache config, route, view, dan compiled agar perubahan `.env`/config langsung terbaca.
+
+### 7. Verifikasi route
+
+```bash
+php artisan route:list --path=mahasiswa -v
+```
+
+- Memastikan `store`, `update`, dan `destroy` tetap dijaga `auth` + `permission:menu-mahasiswa` + `role:admin`.
+
+### 8. Jalankan server development
+
+```bash
+php artisan serve --host=127.0.0.1 --port=8000
+```
+
+- Menjalankan aplikasi untuk pengujian upload dan pengambilan screenshot.
+
+### 9. Jalankan test regresi
+
+```bash
+php artisan test
+```
+
+- Memastikan perubahan tidak merusak fitur yang sudah ada (2 test lulus).
+
+## Ringkasan Perintah Upload
+
+| No | Perintah | Fungsi |
+|----|----------|--------|
+| 1 | `composer require intervention/image` | Install library pengolah gambar |
+| 2 | `composer dump-autoload --no-scripts` | Perbarui autoloader Composer |
+| 3 | `php artisan make:migration add_foto_to_mahasiswa_table --table=mahasiswa` | Buat migration kolom `foto` |
+| 4 | `php artisan migrate` | Jalankan migration |
+| 5 | `php artisan storage:link` | Buat symlink `public/storage` |
+| 6 | `php artisan optimize:clear` | Bersihkan cache config/route/view |
+| 7 | `php artisan route:list --path=mahasiswa -v` | Verifikasi route & middleware |
+| 8 | `php artisan serve --host=127.0.0.1 --port=8000` | Jalankan server untuk pengujian |
+| 9 | `php artisan test` | Test regresi |

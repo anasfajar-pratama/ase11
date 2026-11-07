@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modul Implementasi - Upload Foto pada CRUD Mahasiswa</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background-color: #f6f8fa;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #24292f;
+  }
+  .container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 40px 48px;
+    background: #fff;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+  }
+  h1 {
+    font-size: 30px;
+    border-bottom: 2px solid #e1e4e8;
+    padding-bottom: 12px;
+    margin-top: 0;
+  }
+  h2 {
+    font-size: 22px;
+    border-bottom: 1px solid #e1e4e8;
+    padding-bottom: 8px;
+    margin-top: 36px;
+  }
+  h3 { font-size: 17px; margin-top: 26px; }
+  h4 { font-size: 15px; margin-top: 20px; }
+  .meta { color: #57606a; font-size: 14px; margin-bottom: 8px; }
+  a { color: #0366d6; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    background: #f0f1f3;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  pre {
+    background: #f6f8fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  th, td { border: 1px solid #dfe2e5; padding: 8px 12px; text-align: left; vertical-align: top; }
+  th { background: #f6f8fa; font-weight: 600; }
+  tr:nth-child(even) td { background: #fbfcfd; }
+  ol.toc { columns: 2; column-gap: 40px; }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: #fff;
+  }
+  .badge-new { background: #2da44e; }
+  .badge-updated { background: #ff9800; }
+  .note {
+    background: #fff8c5;
+    border: 1px solid #d4a72c66;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 14px 0;
+  }
+  .danger {
+    background: #ffecec;
+    border: 1px solid #d1242f55;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 14px 0;
+  }
+  .step {
+    border-left: 3px solid #0366d6;
+    padding-left: 16px;
+    margin: 22px 0;
+  }
+  figure {
+    margin: 20px 0;
+    text-align: center;
+  }
+  figure img {
+    max-width: 100%;
+    border: 1px solid #dfe2e5;
+    border-radius: 6px;
+  }
+  figcaption {
+    color: #57606a;
+    font-size: 13px;
+    margin-top: 6px;
+  }
+  .flow {
+    background: #f6f8fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    padding: 14px 18px;
+    font-size: 14px;
+  }
+  footer {
+    margin-top: 40px;
+    padding-top: 16px;
+    border-top: 1px solid #e1e4e8;
+    color: #57606a;
+    font-size: 13px;
+  }
+  @media print { body { background: #fff; } .container { border: none; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Modul Implementasi: Upload Foto pada CRUD Mahasiswa</h1>
+<p class="meta"><strong>Project:</strong> belajar-laravel (Simulasi Penjadwalan Kuliah)</p>
+<p class="meta"><strong>Stack:</strong> Laravel 12.69.1 &middot; PHP 8.2.12 &middot; MySQL <code>db_ase11</code> &middot; intervention/image 3.11.10</p>
+<p class="meta"><strong>Tanggal:</strong> 23 Oktober 2026</p>
+<p class="meta"><strong>Branch:</strong> <code>pertemuan7</code></p>
+
+<h2 id="pendahuluan">Pendahuluan</h2>
+<p>
+Modul ini menambahkan fitur <strong>upload foto</strong> pada CRUD <code>mahasiswa</code> yang sudah ada.
+Foto disimpan di disk <code>public</code>, diresize, lalu dikonversi ke <strong>WebP</strong> agar hemat storage.
+Database hanya menyimpan <em>path</em> file, bukan isi gambarnya.
+</p>
+<p>Tujuan pembelajaran:</p>
+<ol>
+  <li>Memahami alur upload dari form sampai file tersimpan.</li>
+  <li>Menerapkan validasi file yang aman di sisi server.</li>
+  <li>Menggabungkan upload dengan form input biasa (create, edit, delete).</li>
+  <li>Mengoptimasi ukuran file dengan resize dan konversi WebP.</li>
+  <li>Menghapus file lama agar tidak menjadi sampah storage.</li>
+</ol>
+<p>
+Prinsip yang dipakai tetap sama dengan modul sebelumnya: <em>fokus pada fungsi, tampilan sederhana dan rapi</em>,
+tanpa framework CSS tambahan. Semua view tetap halaman HTML mandiri yang memakai CSS bersama
+<code>@include('partials.style')</code>.
+</p>
+
+<h2 id="daftar-isi">Daftar Isi</h2>
+<ol class="toc">
+  <li><a href="#konsep">Konsep Upload</a></li>
+  <li><a href="#prasyarat">Prasyarat</a></li>
+  <li><a href="#langkah">Langkah Implementasi</a></li>
+  <li><a href="#analisa">Analisa Kode</a></li>
+  <li><a href="#bukti">Bukti Implementasi (Screenshot)</a></li>
+  <li><a href="#hemat">Bukti Hemat Storage</a></li>
+  <li><a href="#file-baru">Daftar File Baru</a></li>
+  <li><a href="#file-berubah">Daftar File yang Berubah</a></li>
+  <li><a href="#perintah">Ringkasan Perintah</a></li>
+  <li><a href="#uji">Cara Uji</a></li>
+  <li><a href="#soal">Soal Latihan Mahasiswa</a></li>
+</ol>
+
+<h2 id="konsep">1. Konsep Upload</h2>
+<p>
+Upload adalah proses memindahkan file dari komputer user ke server. File tidak disimpan di database;
+database hanya menyimpan <strong>alamat</strong> file. Isi file disimpan di storage.
+</p>
+<div class="flow">
+  <strong>Alur request upload:</strong><br>
+  form <code>enctype="multipart/form-data"</code>
+  &rarr; browser mengirim file
+  &rarr; PHP menaruh file sementara
+  &rarr; Laravel membungkusnya menjadi <code>UploadedFile</code>
+  &rarr; validasi
+  &rarr; resize + konversi WebP
+  &rarr; <code>Storage::disk('public')-&gt;put()</code>
+  &rarr; simpan path ke kolom <code>foto</code>
+  &rarr; tampilkan lewat URL <code>/storage/...</code>
+</div>
+<p>
+Ada dua hal yang sering tertukar:
+</p>
+<table>
+  <thead>
+    <tr><th>Istilah</th><th>Isi</th><th>Contoh</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Path (disimpan di DB)</td><td>Lokasi relatif di dalam disk</td><td><code>mahasiswa/8f2c....webp</code></td></tr>
+    <tr><td>URL (dipakai di view)</td><td>Alamat yang bisa dibuka browser</td><td><code>http://127.0.0.1:8000/storage/mahasiswa/8f2c....webp</code></td></tr>
+  </tbody>
+</table>
+<div class="note">
+  <strong>Kenapa tidak simpan gambar di database?</strong>
+  Kolom BLOB membuat tabel cepat membengkak, query melambat, dan backup database jadi berat.
+  Simpan file di storage, simpan path-nya di database.
+</div>
+
+<h2 id="prasyarat">2. Prasyarat</h2>
+<ul>
+  <li>CRUD mahasiswa, dosen, mata kuliah, ruangan, kelas, dan jadwal kuliah sudah berjalan.</li>
+  <li>Database MySQL <code>db_ase11</code> aktif dan sudah di-<code>migrate</code>.</li>
+  <li>PHP &ge; 8.2 dengan ekstensi <strong>GD</strong> aktif (cek: <code>php -m | findstr gd</code>).</li>
+  <li>Composer tersedia.</li>
+  <li>Login sebagai admin: <code>admin@example.test</code> / <code>password</code>.</li>
+  <li>Sudah menjalankan <code>php artisan storage:link</code> (dijelaskan di langkah 11).</li>
+</ul>
+
+<h2 id="langkah">3. Langkah Implementasi</h2>
+
+<div class="step">
+<h3>3.1 Install library Intervention Image</h3>
+<p>Jalankan di root proyek:</p>
+<pre><code>composer require intervention/image</code></pre>
+<p>
+Composer memilih <strong>intervention/image 3.11.10</strong> karena versi 4.x mensyaratkan PHP &ge; 8.3,
+sedangkan proyek ini memakai PHP 8.2. Dependency <code>intervention/gif</code> ikut terpasang.
+</p>
+<p>Jika class belum dikenali setelah install, regenerasi autoloader:</p>
+<pre><code>composer dump-autoload --no-scripts</code></pre>
+<p>
+Perubahan pada <code>composer.json</code> hanya menambah satu baris di bagian <code>require</code>:
+</p>
+<pre><code>"require": {
+    "php": "^8.2",
+    "erusev/parsedown": "*",
+    "laravel/framework": "^12.0",
+    "laravel/tinker": "^2.10.1",
+    "spatie/laravel-permission": "*",
+    "intervention/image": "*"
+},</code></pre>
+<div class="note">
+  <code>composer.lock</code> juga berubah, tetapi isinya di-generate otomatis oleh Composer
+  (ribuan baris hash dependency), jadi tidak ditulis manual.
+</div>
+</div>
+
+<div class="step">
+<h3>3.2 Buat migration kolom <code>foto</code></h3>
+<pre><code>php artisan make:migration add_foto_to_mahasiswa_table --table=mahasiswa</code></pre>
+<p>File baru: <code>database/migrations/2026_10_23_174328_add_foto_to_mahasiswa_table.php</code></p>
+<p>Source lengkap:</p>
+<pre><code>&lt;?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('mahasiswa', function (Blueprint $table) {
+            $table-&gt;string('foto')-&gt;nullable()-&gt;after('email');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('mahasiswa', function (Blueprint $table) {
+            $table-&gt;dropColumn('foto');
+        });
+    }
+};</code></pre>
+<p>
+<code>nullable()</code> dipakai karena foto bersifat opsional. Data mahasiswa lama tidak perlu diisi foto.
+</p>
+</div>
+
+<div class="step">
+<h3>3.3 Jalankan migration</h3>
+<pre><code>php artisan migrate</code></pre>
+<p>Output yang diharapkan:</p>
+<pre><code>INFO  Running migrations.
+
+2026_10_23_174328_add_foto_to_mahasiswa_table ........................ DONE</code></pre>
+<p>Verifikasi:</p>
+<pre><code>php artisan migrate:status</code></pre>
+</div>
+
+<div class="step">
+<h3>3.4 Buat service pengolah gambar</h3>
+<p>File baru: <code>app/Services/ImageUploadService.php</code></p>
+<p>Source lengkap:</p>
+<pre><code>&lt;?php
+
+namespace App\Services;
+
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
+
+class ImageUploadService
+{
+    /**
+     * Simpan gambar ke disk public sebagai WebP yang sudah diperkecil.
+     *
+     * @return string Path relatif terhadap disk public, mis. "mahasiswa/uuid.webp".
+     */
+    public function store(UploadedFile $file, string $folder = 'mahasiswa', int $maxWidth = 600): string
+    {
+        $image = (new ImageManager(new Driver()))-&gt;read($file-&gt;getRealPath());
+
+        $image-&gt;scaleDown(width: $maxWidth);
+
+        $path = $folder.'/'.Str::uuid().'.webp';
+
+        Storage::disk('public')-&gt;put($path, $image-&gt;toWebp(75)-&gt;toString());
+
+        return $path;
+    }
+
+    public function delete(?string $path): void
+    {
+        if ($path) {
+            Storage::disk('public')-&gt;delete($path);
+        }
+    }
+}</code></pre>
+<p>
+Service ini sengaja dipisah dari controller agar logika upload bisa dipakai ulang oleh CRUD lain
+(misalnya Dosen atau Ruangan) tanpa menduplikasi kode.
+</p>
+</div>
+
+<div class="step">
+<h3>3.5 Ubah model <code>Mahasiswa</code></h3>
+<p>File: <code>app/Models/Mahasiswa.php</code> <span class="badge badge-updated">updated</span></p>
+<p>Source lengkap setelah perubahan:</p>
+<pre><code>&lt;?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Mahasiswa extends Model
+{
+    use HasFactory;
+
+    protected $table = 'mahasiswa';
+
+    protected $fillable = [
+        'nim',
+        'nama',
+        'jurusan',
+        'email',
+        'angkatan',
+        'kelas_id',
+        'foto',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'angkatan' =&gt; 'integer',
+        ];
+    }
+
+    protected function fotoUrl(): Attribute
+    {
+        return Attribute::get(
+            fn () =&gt; $this-&gt;foto ? asset('storage/'.$this-&gt;foto) : null
+        );
+    }
+
+    public function kelas(): BelongsTo
+    {
+        return $this-&gt;belongsTo(Kelas::class);
+    }
+}</code></pre>
+<p>
+<code>foto</code> ditambahkan ke <code>$fillable</code> agar bisa diisi lewat <code>create()</code> dan <code>update()</code>.
+Accessor <code>fotoUrl</code> mengubah path menjadi URL siap pakai di view.
+</p>
+</div>
+
+<div class="step">
+<h3>3.6 Ubah <code>MahasiswaController</code></h3>
+<p>File: <code>app/Http/Controllers/MahasiswaController.php</code> <span class="badge badge-updated">updated</span></p>
+<p>Source lengkap setelah perubahan:</p>
+<pre><code>&lt;?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Kelas;
+use App\Models\Mahasiswa;
+use App\Services\ImageUploadService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
+
+class MahasiswaController extends Controller
+{
+    public function __construct(private ImageUploadService $imageUpload)
+    {
+    }
+
+    public function index(): View
+    {
+        $mahasiswa = Mahasiswa::with('kelas')
+            -&gt;orderBy('id')
+            -&gt;paginate(10)
+            -&gt;withQueryString();
+
+        return view('mahasiswa.index', compact('mahasiswa'));
+    }
+
+    public function create(): View
+    {
+        $kelas = Kelas::all();
+
+        return view('mahasiswa.create', compact('kelas'));
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $this-&gt;validateMahasiswa($request);
+
+        if ($request-&gt;hasFile('foto')) {
+            $validated['foto'] = $this-&gt;imageUpload-&gt;store($request-&gt;file('foto'));
+        }
+
+        Mahasiswa::create($validated);
+
+        return redirect()
+            -&gt;route('mahasiswa.index')
+            -&gt;with('success', 'Data mahasiswa berhasil ditambahkan.');
+    }
+
+    public function edit(Mahasiswa $mahasiswa): View
+    {
+        $kelas = Kelas::all();
+
+        return view('mahasiswa.edit', compact('mahasiswa', 'kelas'));
+    }
+
+    public function update(Request $request, Mahasiswa $mahasiswa): RedirectResponse
+    {
+        $validated = $this-&gt;validateMahasiswa($request, $mahasiswa);
+        $fotoLama = $mahasiswa-&gt;foto;
+
+        if ($request-&gt;hasFile('foto')) {
+            $validated['foto'] = $this-&gt;imageUpload-&gt;store($request-&gt;file('foto'));
+        }
+
+        $mahasiswa-&gt;update($validated);
+
+        if ($request-&gt;hasFile('foto')) {
+            $this-&gt;imageUpload-&gt;delete($fotoLama);
+        }
+
+        return redirect()
+            -&gt;route('mahasiswa.index')
+            -&gt;with('success', 'Data mahasiswa berhasil diubah.');
+    }
+
+    public function destroy(Mahasiswa $mahasiswa): RedirectResponse
+    {
+        $this-&gt;imageUpload-&gt;delete($mahasiswa-&gt;foto);
+        $mahasiswa-&gt;delete();
+
+        return redirect()
+            -&gt;route('mahasiswa.index')
+            -&gt;with('success', 'Data mahasiswa berhasil dihapus.');
+    }
+
+    private function validateMahasiswa(Request $request, ?Mahasiswa $mahasiswa = null): array
+    {
+        return $request-&gt;validate([
+            'nim' =&gt; [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('mahasiswa', 'nim')-&gt;ignore($mahasiswa),
+            ],
+            'nama' =&gt; ['required', 'string', 'max:100'],
+            'jurusan' =&gt; ['required', 'string', 'max:100'],
+            'angkatan' =&gt; ['required', 'integer', 'min:1900', 'max:2200'],
+            'email' =&gt; ['nullable', 'email', 'max:100'],
+            'kelas_id' =&gt; ['nullable', 'exists:kelas,id'],
+            'foto' =&gt; ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ], [
+            'nim.required' =&gt; 'NIM wajib diisi.',
+            'nim.unique' =&gt; 'NIM sudah digunakan.',
+            'nama.required' =&gt; 'Nama wajib diisi.',
+            'jurusan.required' =&gt; 'Jurusan wajib diisi.',
+            'angkatan.required' =&gt; 'Angkatan wajib diisi.',
+            'kelas_id.exists' =&gt; 'Kelas yang dipilih tidak valid.',
+            'foto.image' =&gt; 'Foto harus berupa gambar.',
+            'foto.mimes' =&gt; 'Foto harus berformat JPG, PNG, atau WebP.',
+            'foto.max' =&gt; 'Ukuran foto maksimal 2 MB.',
+        ]);
+    }
+}</code></pre>
+</div>
+
+<div class="step">
+<h3>3.7 Ubah form tambah mahasiswa</h3>
+<p>File: <code>resources/views/mahasiswa/create.blade.php</code> <span class="badge badge-updated">updated</span></p>
+<p>Source lengkap setelah perubahan:</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="id"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Tambah Mahasiswa&lt;/title&gt;
+    &lt;style&gt;
+        @include('partials.style')
+        body {
+            max-width: 600px;
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Tambah Mahasiswa&lt;/h1&gt;
+
+    @if ($errors-&gt;any())
+        &lt;ul class="errors"&gt;
+            @foreach ($errors-&gt;all() as $error)
+                &lt;li&gt;{{ $error }}&lt;/li&gt;
+            @endforeach
+        &lt;/ul&gt;
+    @endif
+
+    &lt;form action="{{ route('mahasiswa.store') }}" method="POST" enctype="multipart/form-data"&gt;
+        @csrf
+
+        &lt;p&gt;
+            &lt;label for="nim"&gt;NIM&lt;/label&gt;&lt;br&gt;
+            &lt;input type="text" id="nim" name="nim" value="{{ old('nim') }}" maxlength="20" required&gt;
+        &lt;/p&gt;
+
+        &lt;p&gt;
+            &lt;label for="nama"&gt;Nama&lt;/label&gt;&lt;br&gt;
+            &lt;input type="text" id="nama" name="nama" value="{{ old('nama') }}" maxlength="100" required&gt;
+        &lt;/p&gt;
+
+        &lt;p&gt;
+            &lt;label for="jurusan"&gt;Jurusan&lt;/label&gt;&lt;br&gt;
+            &lt;input type="text" id="jurusan" name="jurusan" value="{{ old('jurusan') }}" maxlength="100" required&gt;
+        &lt;/p&gt;
+
+        &lt;p&gt;
+            &lt;label for="angkatan"&gt;Angkatan&lt;/label&gt;&lt;br&gt;
+            &lt;input type="number" id="angkatan" name="angkatan" value="{{ old('angkatan') }}" min="1900" max="2200" required&gt;
+        &lt;/p&gt;
+
+        &lt;p&gt;
+            &lt;label for="email"&gt;Email&lt;/label&gt;&lt;br&gt;
+            &lt;input type="email" id="email" name="email" value="{{ old('email') }}" maxlength="100"&gt;
+        &lt;/p&gt;
+
+        &lt;p&gt;
+            &lt;label for="kelas_id"&gt;Kelas&lt;/label&gt;&lt;br&gt;
+            &lt;select id="kelas_id" name="kelas_id"&gt;
+                &lt;option value=""&gt;-- Pilih Kelas --&lt;/option&gt;
+                @foreach ($kelas as $k)
+                    &lt;option value="{{ $k-&gt;id }}" {{ old('kelas_id') == $k-&gt;id ? 'selected' : '' }}&gt;
+                        {{ $k-&gt;nama_kelas }}
+                    &lt;/option&gt;
+                @endforeach
+            &lt;/select&gt;
+        &lt;/p&gt;
+
+        &lt;p&gt;
+            &lt;label for="foto"&gt;Foto&lt;/label&gt;&lt;br&gt;
+            &lt;input type="file" id="foto" name="foto" accept="image/jpeg,image/png,image/webp"&gt;
+            &lt;span class="hint"&gt;Maks. 2 MB (JPG/PNG/WebP). Foto otomatis dikompres ke WebP maksimal 600px.&lt;/span&gt;
+        &lt;/p&gt;
+
+        &lt;button type="submit"&gt;Simpan&lt;/button&gt;
+        &lt;a href="{{ route('mahasiswa.index') }}" class="btn"&gt;Batal&lt;/a&gt;
+    &lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+</div>
+
+<div class="step">
+<h3>3.8 Ubah form edit mahasiswa</h3>
+<p>File: <code>resources/views/mahasiswa/edit.blade.php</code> <span class="badge badge-updated">updated</span></p>
+<p>Source lengkap setelah perubahan:</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="id"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Ubah Data Mahasiswa&lt;/title&gt;
+    &lt;style&gt;
+        @include('partials.style')
+        body {
+            max-width: 600px;
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Ubah Data Mahasiswa&lt;/h1&gt;
+
+    @if ($errors-&gt;any())
+        &lt;ul class="errors"&gt;
+            @foreach ($errors-&gt;all() as $error)
+                &lt;li&gt;{{ $error }}&lt;/li&gt;
+            @endforeach
+        &lt;/ul&gt;
+    @endif
+
+    &lt;form action="{{ route('mahasiswa.update', $mahasiswa-&gt;id) }}" method="POST" enctype="multipart/form-data"&gt;
+        @csrf
+        @method('PUT')
+
+        &lt;p&gt;
+            &lt;label for="nim"&gt;NIM&lt;/label&gt;&lt;br&gt;
+            &lt;input type="text" id="nim" name="nim" value="{{ old('nim', $mahasiswa-&gt;nim) }}" maxlength="20" required&gt;
+        &lt;/p&gt;
+
+        &lt;p&gt;
+            &lt;label for="nama"&gt;Nama&lt;/label&gt;&lt;br&gt;
+            &lt;input type="text" id="nama" name="nama" value="{{ old('nama', $mahasiswa-&gt;nama) }}" maxlength="100" required&gt;
+        &lt;/p&gt;
+
+        &lt;p&gt;
+            &lt;label for="jurusan"&gt;Jurusan&lt;/label&gt;&lt;br&gt;
+            &lt;input type="text" id="jurusan" name="jurusan" value="{{ old('jurusan', $mahasiswa-&gt;jurusan) }}" maxlength="100" required&gt;
+        &lt;/p&gt;
+
+        &lt;p&gt;
+            &lt;label for="angkatan"&gt;Angkatan&lt;/label&gt;&lt;br&gt;
+            &lt;input type="number" id="angkatan" name="angkatan" value="{{ old('angkatan', $mahasiswa-&gt;angkatan) }}" min="1900" max="2200" required&gt;
+        &lt;/p&gt;
+
+        &lt;p&gt;
+            &lt;label for="email"&gt;Email&lt;/label&gt;&lt;br&gt;
+            &lt;input type="email" id="email" name="email" value="{{ old('email', $mahasiswa-&gt;email) }}" maxlength="100"&gt;
+        &lt;/p&gt;
+
+        &lt;p&gt;
+            &lt;label for="kelas_id"&gt;Kelas&lt;/label&gt;&lt;br&gt;
+            &lt;select id="kelas_id" name="kelas_id"&gt;
+                &lt;option value=""&gt;-- Pilih Kelas --&lt;/option&gt;
+                @foreach ($kelas as $k)
+                    &lt;option value="{{ $k-&gt;id }}" {{ old('kelas_id', $mahasiswa-&gt;kelas_id) == $k-&gt;id ? 'selected' : '' }}&gt;
+                        {{ $k-&gt;nama_kelas }}
+                    &lt;/option&gt;
+                @endforeach
+            &lt;/select&gt;
+        &lt;/p&gt;
+
+        &lt;p&gt;
+            &lt;label for="foto"&gt;Foto&lt;/label&gt;&lt;br&gt;
+            @if ($mahasiswa-&gt;foto)
+                &lt;img src="{{ $mahasiswa-&gt;foto_url }}" alt="Foto {{ $mahasiswa-&gt;nama }}" class="foto-preview"&gt;
+            @endif
+            &lt;input type="file" id="foto" name="foto" accept="image/jpeg,image/png,image/webp"&gt;
+            &lt;span class="hint"&gt;Kosongkan jika tidak ingin mengganti foto. Maks. 2 MB (JPG/PNG/WebP).&lt;/span&gt;
+        &lt;/p&gt;
+
+        &lt;button type="submit"&gt;Simpan Perubahan&lt;/button&gt;
+        &lt;a href="{{ route('mahasiswa.index') }}" class="btn"&gt;Batal&lt;/a&gt;
+    &lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+</div>
+
+<div class="step">
+<h3>3.9 Ubah tabel index mahasiswa</h3>
+<p>File: <code>resources/views/mahasiswa/index.blade.php</code> <span class="badge badge-updated">updated</span></p>
+<p>Source lengkap setelah perubahan:</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="id"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;
+    &lt;title&gt;Data Mahasiswa&lt;/title&gt;
+    &lt;style&gt;
+        @include('partials.style')
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Data Mahasiswa&lt;/h1&gt;
+
+    @if (session('success'))
+        &lt;p class="success"&gt;{{ session('success') }}&lt;/p&gt;
+    @endif
+
+    @include('partials.nav')
+
+    @role('admin')
+        &lt;p&gt;
+            &lt;a href="{{ route('mahasiswa.create') }}" class="btn"&gt;Tambah Mahasiswa&lt;/a&gt;
+        &lt;/p&gt;
+    @endrole
+
+    &lt;table&gt;
+        &lt;thead&gt;
+            &lt;tr&gt;
+                &lt;th&gt;No&lt;/th&gt;
+                &lt;th&gt;Foto&lt;/th&gt;
+                &lt;th&gt;NIM&lt;/th&gt;
+                &lt;th&gt;Nama&lt;/th&gt;
+                &lt;th&gt;Jurusan&lt;/th&gt;
+                &lt;th&gt;Angkatan&lt;/th&gt;
+                &lt;th&gt;Email&lt;/th&gt;
+                &lt;th&gt;Kelas&lt;/th&gt;
+                &lt;th&gt;Action&lt;/th&gt;
+            &lt;/tr&gt;
+        &lt;/thead&gt;
+        &lt;tbody&gt;
+            @forelse ($mahasiswa as $mhs)
+                &lt;tr&gt;
+                    &lt;td&gt;{{ $mahasiswa-&gt;firstItem() + $loop-&gt;index }}&lt;/td&gt;
+                    &lt;td&gt;
+                        @if ($mhs-&gt;foto)
+                            &lt;img src="{{ $mhs-&gt;foto_url }}" alt="Foto {{ $mhs-&gt;nama }}" class="foto-thumb"&gt;
+                        @else
+                            -
+                        @endif
+                    &lt;/td&gt;
+                    &lt;td&gt;{{ $mhs-&gt;nim }}&lt;/td&gt;
+                    &lt;td&gt;{{ $mhs-&gt;nama }}&lt;/td&gt;
+                    &lt;td&gt;{{ $mhs-&gt;jurusan }}&lt;/td&gt;
+                    &lt;td&gt;{{ $mhs-&gt;angkatan }}&lt;/td&gt;
+                    &lt;td&gt;{{ $mhs-&gt;email }}&lt;/td&gt;
+                    &lt;td&gt;{{ $mhs-&gt;kelas-&gt;nama_kelas ?? '-' }}&lt;/td&gt;
+                    &lt;td&gt;
+                        @role('admin')
+                            &lt;a href="{{ route('mahasiswa.edit', $mhs-&gt;id) }}" class="btn"&gt;Ubah&lt;/a&gt;
+
+                            &lt;form
+                                action="{{ route('mahasiswa.destroy', $mhs-&gt;id) }}"
+                                method="POST"
+                                style="display: inline"
+                                onsubmit="return confirm('Yakin ingin menghapus data mahasiswa ini?')"
+                            &gt;
+                                @csrf
+                                @method('DELETE')
+                                &lt;button type="submit"&gt;Hapus&lt;/button&gt;
+                            &lt;/form&gt;
+                        @else
+                            &lt;span&gt;-&lt;/span&gt;
+                        @endrole
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+            @empty
+                &lt;tr&gt;
+                    &lt;td colspan="9"&gt;Belum ada data mahasiswa.&lt;/td&gt;
+                &lt;/tr&gt;
+            @endforelse
+        &lt;/tbody&gt;
+    &lt;/table&gt;
+
+    {{ $mahasiswa-&gt;links('pagination.custom') }}
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+</div>
+
+<div class="step">
+<h3>3.10 Tambah CSS bersama</h3>
+<p>File: <code>resources/views/partials/style.blade.php</code> <span class="badge badge-updated">updated</span></p>
+<p>Source lengkap setelah perubahan:</p>
+<pre><code>body {
+    font-family: Arial, sans-serif;
+    max-width: 1100px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+h1 {
+    margin-bottom: 10px;
+}
+
+a {
+    color: #155eef;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th,
+td {
+    border: 1px solid #999;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+.success {
+    padding: 10px;
+    background-color: #e8f7e8;
+    color: #176b17;
+}
+
+form {
+    display: inline;
+}
+
+label {
+    display: inline-block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input,
+select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px;
+}
+
+input[type="checkbox"] {
+    width: auto;
+    padding: 0;
+    margin-right: 6px;
+}
+
+input[type="file"] {
+    width: auto;
+    padding: 4px;
+}
+
+button,
+.btn {
+    padding: 8px 14px;
+    background-color: #f0f0f0;
+    border: 1px solid #999;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    color: #000;
+    text-decoration: none;
+    display: inline-block;
+}
+
+button:hover,
+.btn:hover {
+    background-color: #e0e0e0;
+}
+
+.errors {
+    padding: 10px 10px 10px 30px;
+    background-color: #ffecec;
+    color: #a40000;
+}
+
+/* Navigasi utama */
+.main-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 16px;
+}
+
+.nav-links a {
+    margin-right: 14px;
+    text-decoration: none;
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-info {
+    font-size: 14px;
+    color: #333;
+}
+
+/* Pagination sederhana */
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 0;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.pagination li span,
+.pagination li a {
+    display: inline-block;
+    padding: 6px 12px;
+    border: 1px solid #999;
+    text-decoration: none;
+    color: #000;
+    background-color: #f0f0f0;
+}
+
+.pagination li a:hover {
+    background-color: #e0e0e0;
+}
+
+.pagination li.active span {
+    background-color: #155eef;
+    border-color: #155eef;
+    color: #fff;
+    font-weight: bold;
+}
+
+.pagination li.disabled span {
+    color: #999;
+    background-color: #f7f7f7;
+    cursor: not-allowed;
+}
+
+/* Foto upload */
+.foto-thumb {
+    display: block;
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.foto-preview {
+    display: block;
+    max-width: 120px;
+    margin-bottom: 8px;
+    padding: 3px;
+    border: 1px solid #999;
+}
+
+.hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #666;
+}</code></pre>
+<p>
+Aturan lama tidak diubah. Yang ditambahkan adalah <code>input[type="file"]</code>,
+<code>.foto-thumb</code>, <code>.foto-preview</code>, dan <code>.hint</code>.
+</p>
+</div>
+
+<div class="step">
+<h3>3.11 Buat symlink storage</h3>
+<pre><code>php artisan storage:link</code></pre>
+<p>Output:</p>
+<pre><code>INFO  The [public/storage] link has been connected to [storage/app/public].</code></pre>
+<div class="note">
+  Tanpa symlink ini, URL <code>/storage/mahasiswa/xxx.webp</code> akan menghasilkan 404
+  meskipun file-nya benar-benar ada di <code>storage/app/public</code>.
+</div>
+</div>
+
+<div class="step">
+<h3>3.12 Bersihkan cache dan verifikasi route</h3>
+<pre><code>php artisan optimize:clear
+php artisan route:list --path=mahasiswa -v</code></pre>
+<p>
+Pastikan <code>store</code>, <code>update</code>, dan <code>destroy</code> masih dijaga
+<code>auth</code>, <code>permission:menu-mahasiswa</code>, dan <code>role:admin</code>.
+Upload tidak boleh membuka akses baru bagi role non-admin.
+</p>
+</div>
+
+<div class="step">
+<h3>3.13 Jalankan aplikasi dan uji</h3>
+<pre><code>php artisan serve --host=127.0.0.1 --port=8000</code></pre>
+<p>Login sebagai admin, lalu uji skenario di bagian <a href="#uji">Cara Uji</a>.</p>
+</div>
+
+<h2 id="analisa">4. Analisa Kode</h2>
+
+<h3>4.1 Kenapa <code>enctype="multipart/form-data"</code> wajib?</h3>
+<p>
+Form biasa mengirim data sebagai <code>application/x-www-form-urlencoded</code> (teks).
+File biner tidak bisa dikirim dengan cara itu. Dengan <code>multipart/form-data</code>,
+browser membagi request menjadi beberapa bagian (field teks + file) sehingga file sampai utuh.
+Kalau atribut ini lupa, <code>$request-&gt;hasFile('foto')</code> akan selalu <code>false</code>.
+</p>
+
+<h3>4.2 Kenapa validasinya <code>nullable</code> + <code>image</code> + <code>mimes</code> + <code>max</code>?</h3>
+<table>
+  <thead>
+    <tr><th>Rule</th><th>Fungsi</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>nullable</code></td><td>Foto boleh kosong. Mahasiswa lama dan form edit tanpa ganti foto tetap valid.</td></tr>
+    <tr><td><code>image</code></td><td>Memastikan isi file benar-benar gambar, bukan hanya ekstensi yang diganti.</td></tr>
+    <tr><td><code>mimes:jpg,jpeg,png,webp</code></td><td>Membatasi format yang diterima. SVG sengaja tidak diizinkan karena bisa berisi JavaScript.</td></tr>
+    <tr><td><code>max:2048</code></td><td>Batas 2048 KB = 2 MB. Satuan rule ini <strong>kilobyte</strong>, bukan byte.</td></tr>
+  </tbody>
+</table>
+<p>
+Validasi ditempatkan di method <code>validateMahasiswa()</code> agar aturan yang sama dipakai
+oleh <code>store()</code> dan <code>update()</code>, termasuk pengecualian unique NIM saat edit.
+</p>
+
+<h3>4.3 Kenapa memakai <code>hasFile()</code>?</h3>
+<p>
+<code>$request-&gt;file('foto')</code> bisa bernilai <code>null</code> kalau user tidak memilih file.
+<code>hasFile()</code> memastikan file benar-benar ada dan upload-nya sukses sebelum service dipanggil.
+Ini juga yang membuat form edit bisa mempertahankan foto lama.
+</p>
+
+<h3>4.4 Kenapa <code>scaleDown()</code> lalu <code>toWebp(75)</code>?</h3>
+<ul>
+  <li><strong><code>scaleDown(width: 600)</code></strong> memperkecil gambar secara proporsional sampai lebar maksimal 600px. Gambar yang lebih kecil tidak diperbesar, jadi tidak kehilangan kualitas.</li>
+  <li><strong><code>toWebp(75)</code></strong> mengubah format ke WebP dengan kualitas 75. WebP umumnya jauh lebih kecil dari JPG/PNG pada kualitas visual yang setara.</li>
+  <li><strong><code>toString()</code></strong> mengambil isi biner hasil encode untuk disimpan lewat <code>Storage::put()</code>.</li>
+</ul>
+
+<h3>4.5 Kenapa nama file memakai UUID?</h3>
+<p>
+Nama asli dari user tidak aman dan bisa bentrok. <code>Str::uuid()</code> menghasilkan nama unik
+seperti <code>8f2c1a7e-....webp</code>, sehingga dua user yang mengupload <code>foto.jpg</code>
+tidak saling menimpa, dan nama asli tidak bocor ke publik.
+</p>
+
+<h3>4.6 Kenapa database menyimpan path, bukan URL?</h3>
+<p>
+Path bersifat portabel. Kalau nanti pindah dari disk lokal ke S3 atau CDN, isi database tidak perlu diubah;
+cukup ubah cara membentuk URL di accessor. URL lengkap juga bergantung pada domain/port yang bisa berubah.
+</p>
+
+<h3>4.7 Kenapa accessor memakai <code>asset('storage/...')</code>?</h3>
+<p>
+<code>Storage::disk('public')-&gt;url()</code> membentuk URL dari <code>APP_URL</code> di <code>.env</code>.
+Kalau <code>APP_URL</code> tidak sama dengan alamat yang sedang dibuka (misalnya aplikasi dijalankan di
+<code>127.0.0.1:8000</code> tetapi <code>APP_URL=http://localhost</code>), gambar akan menunjuk ke host yang salah
+dan gagal dimuat. <code>asset()</code> mengikuti alamat request, sehingga lebih aman untuk pengembangan
+dengan <code>php artisan serve</code>.
+</p>
+
+<h3>4.8 Kenapa file lama dihapus setelah update?</h3>
+<pre><code>$fotoLama = $mahasiswa-&gt;foto;
+
+if ($request-&gt;hasFile('foto')) {
+    $validated['foto'] = $this-&gt;imageUpload-&gt;store($request-&gt;file('foto'));
+}
+
+$mahasiswa-&gt;update($validated);
+
+if ($request-&gt;hasFile('foto')) {
+    $this-&gt;imageUpload-&gt;delete($fotoLama);
+}</code></pre>
+<p>
+Urutannya: simpan file baru &rarr; update database &rarr; hapus file lama.
+Kalau file lama dihapus lebih dulu lalu update database gagal, data akan menunjuk file yang sudah tidak ada.
+Dengan urutan ini, kegagalan update tidak merusak file lama.
+</p>
+
+<h3>4.9 Kenapa file dihapus saat <code>destroy()</code>?</h3>
+<p>
+Tanpa penghapusan, file akan menumpuk di storage meskipun baris database sudah hilang.
+File seperti ini disebut <em>orphan file</em>. Menghapus file lebih dulu, lalu baris database,
+membuat data tidak pernah menunjuk file yang sudah hilang.
+</p>
+
+<h2 id="bukti">5. Bukti Implementasi (Screenshot)</h2>
+
+<figure>
+  <img src="screenshots/upload-create-form.png" alt="Form tambah mahasiswa dengan input foto">
+  <figcaption>Gambar 1. Form tambah mahasiswa: input file, hint format/ukuran, dan tombol simpan.</figcaption>
+</figure>
+
+<figure>
+  <img src="screenshots/upload-validation.png" alt="Error validasi file bukan gambar">
+  <figcaption>Gambar 2. Validasi server menolak file <code>.txt</code> dengan pesan berbahasa Indonesia.</figcaption>
+</figure>
+
+<figure>
+  <img src="screenshots/upload-index.png" alt="Tabel mahasiswa dengan kolom foto">
+  <figcaption>Gambar 3. Kolom Foto pada tabel index menampilkan thumbnail WebP 48 &times; 48 px.</figcaption>
+</figure>
+
+<figure>
+  <img src="screenshots/upload-edit.png" alt="Form edit dengan preview foto lama">
+  <figcaption>Gambar 4. Form edit menampilkan preview foto lama; foto hanya diganti jika user memilih file baru.</figcaption>
+</figure>
+
+<h2 id="hemat">6. Bukti Hemat Storage</h2>
+<p>Pengujian dengan foto berukuran 1200 &times; 1600 px:</p>
+<table>
+  <thead>
+    <tr><th>Ukuran</th><th>File asli (JPG)</th><th>Hasil (WebP)</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Dimensi</td><td>1200 &times; 1600 px</td><td>600 &times; 800 px</td></tr>
+    <tr><td>Ukuran file</td><td>225.106 byte (&plusmn;220 KB)</td><td>39.316 byte (&plusmn;38 KB)</td></tr>
+    <tr><td>Penghematan</td><td colspan="2"><strong>&plusmn;82,5%</strong></td></tr>
+  </tbody>
+</table>
+<p>
+Pada percobaan gambar gradien sederhana, hasilnya 68.207 byte &rarr; 3.442 byte (&plusmn;95%).
+Angka persisnya bergantung pada isi gambar, tetapi resize + WebP konsisten memotong ukuran secara signifikan.
+</p>
+<p>Verifikasi file di server:</p>
+<pre><code>dir storage\app\public\mahasiswa</code></pre>
+<pre><code>24/10/2026  05:55            39.316 8f2c1a7e-....webp</code></pre>
+
+<h2 id="file-baru">7. Daftar File Baru</h2>
+<table>
+  <thead>
+    <tr><th>No</th><th>File</th><th>Keterangan</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td><code>database/migrations/2026_10_23_174328_add_foto_to_mahasiswa_table.php</code></td><td>Menambah kolom <code>foto</code> nullable pada tabel <code>mahasiswa</code>.</td></tr>
+    <tr><td>2</td><td><code>app/Services/ImageUploadService.php</code></td><td>Resize, konversi WebP, simpan, dan hapus file.</td></tr>
+    <tr><td>3</td><td><code>libraryupload.md</code></td><td>Materi teori upload (CRUD yang cocok, library, validasi, proses, optimasi).</td></tr>
+    <tr><td>4</td><td><code>MODUL_UPLOAD.html</code></td><td>Modul kuliah ini.</td></tr>
+    <tr><td>5</td><td><code>screenshots/upload-create-form.png</code></td><td>Screenshot form tambah dengan input foto.</td></tr>
+    <tr><td>6</td><td><code>screenshots/upload-validation.png</code></td><td>Screenshot validasi file bukan gambar.</td></tr>
+    <tr><td>7</td><td><code>screenshots/upload-index.png</code></td><td>Screenshot tabel dengan thumbnail foto.</td></tr>
+    <tr><td>8</td><td><code>screenshots/upload-edit.png</code></td><td>Screenshot form edit dengan preview foto lama.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="file-berubah">8. Daftar File yang Berubah</h2>
+<table>
+  <thead>
+    <tr><th>No</th><th>File</th><th>Perubahan</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td><code>app/Models/Mahasiswa.php</code></td><td><code>foto</code> masuk <code>$fillable</code>; accessor <code>fotoUrl</code>.</td></tr>
+    <tr><td>2</td><td><code>app/Http/Controllers/MahasiswaController.php</code></td><td>Inject service, validasi foto, simpan/ganti/hapus file.</td></tr>
+    <tr><td>3</td><td><code>resources/views/mahasiswa/create.blade.php</code></td><td><code>enctype</code> + input file + hint.</td></tr>
+    <tr><td>4</td><td><code>resources/views/mahasiswa/edit.blade.php</code></td><td><code>enctype</code> + input file + preview foto lama.</td></tr>
+    <tr><td>5</td><td><code>resources/views/mahasiswa/index.blade.php</code></td><td>Kolom Foto + thumbnail; <code>colspan</code> empty-state 8 &rarr; 9.</td></tr>
+    <tr><td>6</td><td><code>resources/views/partials/style.blade.php</code></td><td>CSS <code>.foto-thumb</code>, <code>.foto-preview</code>, <code>.hint</code>, file input.</td></tr>
+    <tr><td>7</td><td><code>composer.json</code></td><td>Menambah <code>intervention/image</code>.</td></tr>
+    <tr><td>8</td><td><code>composer.lock</code></td><td>Lockfile hasil <code>composer require</code> (generated).</td></tr>
+    <tr><td>9</td><td><code>catatan.md</code></td><td>Bagian baru: perintah fitur upload + tabel ringkasan.</td></tr>
+  </tbody>
+</table>
+<div class="note">
+  Symlink <code>public/storage</code> juga dibuat, tetapi tidak masuk daftar file karena merupakan
+  symbolic link (dan diabaikan Git lewat <code>/public/storage</code> pada <code>.gitignore</code>).
+  File upload di <code>storage/app/public/mahasiswa/</code> juga tidak di-commit.
+</div>
+
+<h2 id="perintah">9. Ringkasan Perintah</h2>
+<table>
+  <thead>
+    <tr><th>No</th><th>Perintah</th><th>Fungsi</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td><code>composer require intervention/image</code></td><td>Install library pengolah gambar.</td></tr>
+    <tr><td>2</td><td><code>composer dump-autoload --no-scripts</code></td><td>Perbarui autoloader Composer.</td></tr>
+    <tr><td>3</td><td><code>php artisan make:migration add_foto_to_mahasiswa_table --table=mahasiswa</code></td><td>Buat migration kolom <code>foto</code>.</td></tr>
+    <tr><td>4</td><td><code>php artisan migrate</code></td><td>Jalankan migration.</td></tr>
+    <tr><td>5</td><td><code>php artisan storage:link</code></td><td>Buat symlink <code>public/storage</code>.</td></tr>
+    <tr><td>6</td><td><code>php artisan optimize:clear</code></td><td>Bersihkan cache config/route/view.</td></tr>
+    <tr><td>7</td><td><code>php artisan route:list --path=mahasiswa -v</code></td><td>Verifikasi route dan middleware.</td></tr>
+    <tr><td>8</td><td><code>php artisan serve --host=127.0.0.1 --port=8000</code></td><td>Jalankan server untuk pengujian.</td></tr>
+    <tr><td>9</td><td><code>php artisan test</code></td><td>Test regresi (2 test lulus).</td></tr>
+  </tbody>
+</table>
+
+<h2 id="uji">10. Cara Uji</h2>
+<ol>
+  <li>Jalankan <code>php artisan serve --host=127.0.0.1 --port=8000</code>.</li>
+  <li>Buka <code>http://127.0.0.1:8000/login</code>, masuk dengan <code>admin@example.test</code> / <code>password</code>.</li>
+  <li>Buka menu <strong>Mahasiswa</strong>, klik <strong>Ubah</strong> pada salah satu baris.</li>
+  <li>Pilih file JPG/PNG/WebP, klik <strong>Simpan Perubahan</strong>.
+      Foto harus muncul di kolom Foto pada tabel.</li>
+  <li>Buka form <strong>Tambah Mahasiswa</strong>, isi data, unggah file <code>.txt</code>.
+      Harus muncul dua pesan: “Foto harus berupa gambar.” dan
+      “Foto harus berformat JPG, PNG, atau WebP.”</li>
+  <li>Ubah lagi data yang sama dengan foto berbeda. Cek folder
+      <code>storage/app/public/mahasiswa</code>: hanya file baru yang tersisa.</li>
+  <li>Hapus data mahasiswa tersebut. File di folder upload harus ikut terhapus.</li>
+  <li>Pastikan login sebagai role <code>mahasiswa</code> tidak bisa membuka
+      <code>/mahasiswa/create</code> (403) dan tidak melihat tombol Ubah/Hapus.</li>
+</ol>
+<p>Verifikasi cepat lewat terminal:</p>
+<pre><code>dir storage\app\public\mahasiswa
+php artisan migrate:status
+php artisan route:list --path=mahasiswa -v</code></pre>
+
+<h2 id="soal">11. Soal Latihan Mahasiswa (Jam Terbang)</h2>
+<p>
+Kerjakan di proyek masing-masing. Manfaatkan pola yang sudah ada:
+migration &rarr; model &rarr; service &rarr; controller &rarr; view &rarr; uji.
+Kumpulkan source code, screenshot, dan catatan perintah.
+</p>
+
+<h3>Soal 1 — Wajib (40 poin): Upload Foto Dosen</h3>
+<p>Tambahkan fitur upload foto pada CRUD <strong>Dosen</strong>.</p>
+<ol type="a">
+  <li>Buat migration <code>add_foto_to_dosen_table</code> dengan kolom <code>foto</code> nullable.</li>
+  <li>Tambahkan <code>foto</code> ke <code>$fillable</code> model <code>Dosen</code> dan buat accessor <code>fotoUrl</code>.</li>
+  <li>Gunakan <code>ImageUploadService</code> yang sudah ada (jangan menduplikasi logika resize/WebP).</li>
+  <li>Validasi: nullable, image, mimes jpg/jpeg/png/webp, maksimal 2 MB, dengan pesan Indonesia.</li>
+  <li>Form create dan edit memakai <code>enctype="multipart/form-data"</code>; form edit menampilkan preview.</li>
+  <li>Tabel index dosen menampilkan thumbnail 48 &times; 48 px.</li>
+  <li>Saat foto diganti atau data dihapus, file lama harus terhapus dari storage.</li>
+</ol>
+<p><strong>Penilaian:</strong> migration 5, model 5, validasi 5, create 5, edit 5, index 5, hapus file 5, screenshot 5.</p>
+
+<h3>Soal 2 — Wajib (30 poin): Upload Modul PDF Mata Kuliah</h3>
+<p>Tambahkan kolom <code>modul</code> pada CRUD <strong>Mata Kuliah</strong> untuk file PDF.</p>
+<ol type="a">
+  <li>Migration kolom <code>modul</code> nullable (string, simpan path).</li>
+  <li>Validasi <code>nullable|file|mimes:pdf|max:5120</code> (maksimal 5 MB).</li>
+  <li>Simpan file ke <code>storage/app/public/modul</code> dengan nama UUID + <code>.pdf</code>.</li>
+  <li>Tampilkan link <strong>Unduh Modul</strong> di tabel index jika file ada.</li>
+  <li>Hapus file saat data dihapus atau modul diganti.</li>
+</ol>
+<p><strong>Penilaian:</strong> migration 5, validasi 5, proses simpan 10, link unduh 5, hapus file 5.</p>
+
+<h3>Soal 3 — Pilihan (20 poin): Banyak Lampiran untuk Jadwal Kuliah</h3>
+<p>Buat fitur upload <strong>banyak file</strong> untuk satu jadwal.</p>
+<ol type="a">
+  <li>Buat tabel <code>lampiran_jadwal</code>: id, <code>jadwal_kuliah_id</code> (cascadeOnDelete), <code>path</code>, <code>nama_asli</code>, timestamps.</li>
+  <li>Buat model + relasi <code>JadwalKuliah hasMany LampiranJadwal</code>.</li>
+  <li>Form menerima <code>lampiran[]</code> (multiple) dan memvalidasi setiap file.</li>
+  <li>Simpan setiap file, lalu tampilkan daftar link unduh.</li>
+  <li>Saat jadwal dihapus, semua file dan baris lampiran ikut terhapus.</li>
+</ol>
+<p><strong>Penilaian:</strong> struktur tabel 5, relasi 5, proses upload multiple 5, tampilan 3, hapus massal 2.</p>
+
+<h3>Soal 4 — Pilihan (10 poin): Dua Ukuran Gambar</h3>
+<p>Selain foto 600px, buat thumbnail 150px. Bandingkan ukuran file dan tuliskan kesimpulan singkat
+(tabel sebelum/sesudah). Jelaskan kapan sebaiknya memakai satu versi saja.</p>
+<p><strong>Penilaian:</strong> implementasi 6, analisis ukuran 4.</p>
+
+<h3>Rubrik Umum</h3>
+<table>
+  <thead>
+    <tr><th>Aspek</th><th>Bobot</th><th>Indikator</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Kebenaran fungsi</td><td>40%</td><td>Upload, tampil, ganti, dan hapus berjalan tanpa error.</td></tr>
+    <tr><td>Validasi &amp; keamanan</td><td>25%</td><td>File salah ditolak; nama file acak; ukuran dibatasi.</td></tr>
+    <tr><td>Efisiensi storage</td><td>20%</td><td>Resize/konversi diterapkan; file lama tidak menumpuk.</td></tr>
+    <tr><td>Kerapian kode</td><td>10%</td><td>Service dipakai ulang; tidak ada duplikasi logika.</td></tr>
+    <tr><td>Dokumentasi</td><td>5%</td><td>Screenshot, catatan perintah, dan penjelasan singkat.</td></tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>Tips pengerjaan:</strong> kerjakan satu CRUD sampai selesai sebelum pindah ke CRUD lain.
+  Selalu uji empat skenario: upload valid, upload file salah, ganti file, dan hapus data.
+  Periksa isi folder <code>storage/app/public/...</code> setiap kali selesai menguji.
+</div>
+
+<footer>
+  Modul Implementasi Upload Foto &middot; Project belajar-laravel &middot; Laravel 12 &middot; PHP 8.2 &middot; 23 Oktober 2026
+</footer>
+
+</div>
+</body>
+</html>

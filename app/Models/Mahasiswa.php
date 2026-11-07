@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 class Mahasiswa extends Model
 {
     use HasFactory;
@@ -18,6 +20,7 @@ class Mahasiswa extends Model
         'email',
         'angkatan',
         'kelas_id',
+        'foto',
     ];
 
     protected function casts(): array
@@ -25,6 +28,13 @@ class Mahasiswa extends Model
         return [
             'angkatan' => 'integer',
         ];
+    }
+
+    protected function fotoUrl(): Attribute
+    {
+        return Attribute::get(
+            fn () => $this->foto ? asset('storage/'.$this->foto) : null
+        );
     }
 
     public function kelas(): BelongsTo

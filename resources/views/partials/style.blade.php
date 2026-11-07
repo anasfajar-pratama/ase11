@@ -59,6 +59,11 @@ input[type="checkbox"] {
     margin-right: 6px;
 }
 
+input[type="file"] {
+    width: auto;
+    padding: 4px;
+}
+
 button,
 .btn {
     padding: 8px 14px;
@@ -150,4 +155,28 @@ button:hover,
     color: #999;
     background-color: #f7f7f7;
     cursor: not-allowed;
+}
+
+/* Foto upload */
+.foto-thumb {
+    display: block;
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.foto-preview {
+    display: block;
+    max-width: 120px;
+    margin-bottom: 8px;
+    padding: 3px;
+    border: 1px solid #999;
+}
+
+.hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #666;
 }

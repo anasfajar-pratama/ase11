@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soal UTS - Simulasi Penjadwalan Kuliah (Laravel)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.7;
+            color: #24292e;
+            background-color: #f6f8fa;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 45px 80px;
+            background-color: #fff;
+            min-height: 100vh;
+        }
+
+        header {
+            border-bottom: 3px solid #155eef;
+            padding-bottom: 20px;
+            margin-bottom: 10px;
+        }
+
+        header .kicker {
+            display: inline-block;
+            background-color: #155eef;
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            padding: 4px 12px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        header h1 {
+            font-size: 1.9em;
+            color: #1a1a1a;
+            margin-bottom: 6px;
+        }
+
+        header .subtitle {
+            color: #57606a;
+            font-size: 1em;
+        }
+
+        .info-box {
+            background-color: #f1f6ff;
+            border-left: 4px solid #155eef;
+            border-radius: 4px;
+            padding: 16px 20px;
+            margin: 24px 0 36px;
+            font-size: 14px;
+        }
+
+        .info-box strong {
+            color: #155eef;
+        }
+
+        .info-box ul {
+            margin: 8px 0 0 20px;
+        }
+
+        .info-box li {
+            margin-bottom: 4px;
+        }
+
+        .soal {
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            margin-bottom: 28px;
+            overflow: hidden;
+            page-break-inside: avoid;
+        }
+
+        .soal-header {
+            background-color: #f6f8fa;
+            border-bottom: 1px solid #e1e4e8;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .soal-number {
+            flex: 0 0 auto;
+            background-color: #155eef;
+            color: #fff;
+            font-weight: bold;
+            font-size: 14px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .soal-header h2 {
+            font-size: 1.08em;
+            color: #24292e;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .soal-body {
+            padding: 18px 20px 22px;
+        }
+
+        .jawaban {
+            border-left: 3px solid #2da44e;
+            padding: 2px 0 2px 16px;
+            margin-top: 6px;
+        }
+
+        .jawaban + .jawaban-label {
+            display: block;
+            margin-top: 22px;
+        }
+
+        .jawaban-label {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: #2da44e;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .poin {
+            font-weight: 600;
+            color: #24292e;
+        }
+
+        p {
+            margin-bottom: 10px;
+        }
+
+        ul, ol {
+            margin: 8px 0 12px 22px;
+        }
+
+        li {
+            margin-bottom: 4px;
+        }
+
+        code {
+            background-color: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.88em;
+            color: #b3204d;
+        }
+
+        pre {
+            background-color: #0d1117;
+            color: #e6edf3;
+            padding: 16px 18px;
+            border-radius: 6px;
+            margin: 10px 0 16px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+            font-size: inherit;
+        }
+
+        .caption {
+            font-size: 12.5px;
+            color: #57606a;
+            margin: -8px 0 14px;
+            font-style: italic;
+        }
+
+        .kunci {
+            background-color: #fff8e6;
+            border: 1px dashed #d4a72c;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-top: 10px;
+            font-size: 13.5px;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #e1e4e8;
+            margin: 40px 0;
+        }
+
+        footer {
+            margin-top: 30px;
+            padding-top: 18px;
+            border-top: 1px solid #e1e4e8;
+            font-size: 13px;
+            color: #57606a;
+            text-align: center;
+        }
+
+        @media print {
+            body { background: #fff; }
+            .container { padding: 0; max-width: 100%; }
+            .soal { border-color: #ccc; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <span class="kicker">Ujian Tengah Semester</span>
+        <h1>Soal UTS Pemrograman Web (Laravel)</h1>
+        <p class="subtitle">Studi Kasus: <strong>Aplikasi Simulasi Penjadwalan Kuliah</strong> &middot; Laravel 12</p>
+    </header>
+
+    <div class="info-box">
+        <strong>Petunjuk Pengerjaan:</strong>
+        <ul>
+            <li>Terdapat <strong>11 soal</strong>: <strong>Soal 1</strong> berupa <em>soal praktik</em> (membangun project dari nol), sedangkan <strong>soal 2&ndash;11</strong> berupa soal pemahaman konsep.</li>
+            <li>Jawablah dengan <strong>penjelasan (deskripsi)</strong> dan, bila perlu, <strong>contoh kode</strong>.</li>
+            <li>Sifat ujian: <strong>Open Book</strong> (project &amp; dokumentasi boleh dibuka).</li>
+            <li>Tekankan pada pemahaman konsep dasar, bukan sekadar hafalan sintaks.</li>
+        </ul>
+    </div>
+
+    <!-- SOAL 1 -->
+    <div class="soal">
+        <div class="soal-header">
+            <span class="soal-number">1</span>
+            <h2>Soal Praktik &mdash; Bangun project Laravel baru dari nol, lalu lengkapi fitur CRUD untuk data <code>mahasiswa</code> hingga aplikasi siap dijalankan. Kerjakan secara berurutan sesuai ketentuan berikut.</h2>
+        </div>
+        <div class="soal-body">
+            <span class="jawaban-label">Perintah Soal</span>
+            <div class="jawaban">
+                <p>Buatlah aplikasi pengelolaan <strong>data mahasiswa</strong> menggunakan Laravel. Aplikasi harus dapat menampilkan daftar mahasiswa serta menambah, mengubah, dan menghapus data. Ikuti langkah-langkah berikut:</p>
+
+                <p><span class="poin">a. Instalasi Project</span></p>
+                <ul>
+                    <li>Buat project Laravel baru menggunakan Composer dengan nama <code>crud-mahasiswa</code>.</li>
+                    <li>Masuk ke folder project, lalu jalankan server development.</li>
+                    <li>Pastikan halaman awal Laravel tampil di browser (<code>http://127.0.0.1:8000</code>).</li>
+                </ul>
+
+                <p><span class="poin">b. Konfigurasi Database</span></p>
+                <ul>
+                    <li>Salin file <code>.env.example</code> menjadi <code>.env</code>, lalu buat application key.</li>
+                    <li>Atur koneksi database MySQL pada file <code>.env</code>.</li>
+                    <li>Buat database kosong di MySQL, misalnya <code>db_crud_mahasiswa</code>.</li>
+                </ul>
+
+                <p><span class="poin">c. Migration &amp; Model</span></p>
+                <ul>
+                    <li>Buat migration tabel <code>mahasiswa</code> dengan kolom: <code>id</code>, <code>nim</code> (unik, maks 20 karakter), <code>nama</code> (maks 100), <code>jurusan</code> (maks 100), <code>email</code> (boleh kosong), <code>angkatan</code> (angka), dan <code>timestamps</code>.</li>
+                    <li>Buat Model <code>Mahasiswa</code> dengan <code>protected $fillable</code> yang sesuai.</li>
+                    <li>Jalankan migration dan pastikan tabel <code>mahasiswa</code> berhasil dibuat.</li>
+                </ul>
+
+                <p><span class="poin">d. Routing &amp; Controller</span></p>
+                <ul>
+                    <li>Buat controller resource <code>MahasiswaController</code>.</li>
+                    <li>Daftarkan <code>Route::resource('mahasiswa', MahasiswaController::class)</code> pada <code>routes/web.php</code>.</li>
+                    <li>Lengkapi method: <code>index</code> (menampilkan semua data), <code>create</code> (form tambah), <code>store</code> (simpan), <code>edit</code> (form ubah), <code>update</code> (perbarui), dan <code>destroy</code> (hapus).</li>
+                </ul>
+
+                <p><span class="poin">e. Validasi</span></p>
+                <ul>
+                    <li>Terapkan validasi pada <code>store()</code> dan <code>update()</code>: <code>nim</code>, <code>nama</code>, <code>jurusan</code>, dan <code>angkatan</code> wajib diisi; <code>nim</code> harus unik; serta <code>email</code> (jika diisi) harus berformat email yang valid.</li>
+                    <li>Jika validasi gagal, tampilkan pesan error dan pertahankan input sebelumnya menggunakan <code>old()</code>.</li>
+                </ul>
+
+                <p><span class="poin">f. Tampilan (View)</span></p>
+                <ul>
+                    <li>Buat view <code>index</code> (tabel daftar mahasiswa + tombol Ubah/Hapus), <code>create</code>, dan <code>edit</code>.</li>
+                    <li>Setiap form harus menyertakan <code>@csrf</code>, serta <code>@method('PUT')</code> pada form edit dan <code>@method('DELETE')</code> pada tombol hapus.</li>
+                    <li>Tampilkan notifikasi sukses setelah data berhasil disimpan, diubah, atau dihapus.</li>
+                </ul>
+
+                <p><span class="poin">g. Uji Coba</span></p>
+                <ul>
+                    <li>Jalankan aplikasi dan buktikan seluruh fitur CRUD berjalan: tambah, lihat, ubah, dan hapus data mahasiswa.</li>
+                </ul>
+
+                <p class="caption">Kumpulkan: struktur folder project, isi migration, model, controller, route, view, serta screenshot aplikasi yang sudah berjalan.</p>
+            </div>
+
+            <span class="jawaban-label">Kunci / Langkah Pengerjaan</span>
+            <div class="jawaban">
+<pre><code># a. Instalasi project
+composer create-project laravel/laravel crud-mahasiswa
+cd crud-mahasiswa
+php artisan serve
+
+# b. Konfigurasi database
+cp .env.example .env              # Windows: copy .env.example .env
+php artisan key:generate
+# lalu sesuaikan DB_DATABASE, DB_USERNAME, DB_PASSWORD pada .env
+
+# c. Migration & model
+php artisan make:migration create_mahasiswa_table
+php artisan make:model Mahasiswa
+php artisan migrate
+
+# d. Controller & route
+php artisan make:controller MahasiswaController --resource</code></pre>
+
+<pre><code>// routes/web.php
+Route::resource('mahasiswa', MahasiswaController::class);</code></pre>
+
+<pre><code>// database/migrations/xxxx_xx_xx_xxxxxx_create_mahasiswa_table.php
+public function up(): void
+{
+    Schema::create('mahasiswa', function (Blueprint $table): void {
+        $table-&gt;id();
+        $table-&gt;string('nim', 20)-&gt;unique();
+        $table-&gt;string('nama', 100);
+        $table-&gt;string('jurusan', 100);
+        $table-&gt;string('email', 100)-&gt;nullable();
+        $table-&gt;unsignedSmallInteger('angkatan');
+        $table-&gt;timestamps();
+    });
+}</code></pre>
+
+<pre><code>// app/Models/Mahasiswa.php
+class Mahasiswa extends Model
+{
+    protected $fillable = ['nim', 'nama', 'jurusan', 'email', 'angkatan'];
+}</code></pre>
+
+<pre><code>// app/Http/Controllers/MahasiswaController.php
+public function index(): View
+{
+    $mahasiswa = Mahasiswa::orderBy('id')-&gt;get();
+
+    return view('mahasiswa.index', compact('mahasiswa'));
+}
+
+public function store(Request $request): RedirectResponse
+{
+    $validated = $request-&gt;validate([
+        'nim'      =&gt; ['required', 'string', 'max:20', Rule::unique('mahasiswa', 'nim')],
+        'nama'     =&gt; ['required', 'string', 'max:100'],
+        'jurusan'  =&gt; ['required', 'string', 'max:100'],
+        'email'    =&gt; ['nullable', 'email', 'max:100'],
+        'angkatan' =&gt; ['required', 'integer', 'min:1900', 'max:2200'],
+    ]);
+
+    Mahasiswa::create($validated);
+
+    return redirect()-&gt;route('mahasiswa.index')
+        -&gt;with('success', 'Data mahasiswa berhasil ditambahkan.');
+}
+
+public function update(Request $request, Mahasiswa $mahasiswa): RedirectResponse
+{
+    $validated = $request-&gt;validate([
+        'nim'      =&gt; ['required', 'string', 'max:20', Rule::unique('mahasiswa', 'nim')-&gt;ignore($mahasiswa-&gt;id)],
+        'nama'     =&gt; ['required', 'string', 'max:100'],
+        'jurusan'  =&gt; ['required', 'string', 'max:100'],
+        'email'    =&gt; ['nullable', 'email', 'max:100'],
+        'angkatan' =&gt; ['required', 'integer', 'min:1900', 'max:2200'],
+    ]);
+
+    $mahasiswa-&gt;update($validated);
+
+    return redirect()-&gt;route('mahasiswa.index')
+        -&gt;with('success', 'Data mahasiswa berhasil diubah.');
+}
+
+public function destroy(Mahasiswa $mahasiswa): RedirectResponse
+{
+    $mahasiswa-&gt;delete();
+
+    return redirect()-&gt;route('mahasiswa.index')
+        -&gt;with('success', 'Data mahasiswa berhasil dihapus.');
+}</code></pre>
+
+<pre><code>{{-- resources/views/mahasiswa/index.blade.php --}}
+@if (session('success'))
+    &lt;p class="success"&gt;{{ session('success') }}&lt;/p&gt;
+@endif
+
+&lt;table&gt;
+    &lt;thead&gt;
+        &lt;tr&gt;&lt;th&gt;No&lt;/th&gt;&lt;th&gt;NIM&lt;/th&gt;&lt;th&gt;Nama&lt;/th&gt;&lt;th&gt;Jurusan&lt;/th&gt;&lt;th&gt;Aksi&lt;/th&gt;&lt;/tr&gt;
+    &lt;/thead&gt;
+    &lt;tbody&gt;
+        @forelse ($mahasiswa as $mhs)
+            &lt;tr&gt;
+                &lt;td&gt;{{ $loop-&gt;iteration }}&lt;/td&gt;
+                &lt;td&gt;{{ $mhs-&gt;nim }}&lt;/td&gt;
+                &lt;td&gt;{{ $mhs-&gt;nama }}&lt;/td&gt;
+                &lt;td&gt;{{ $mhs-&gt;jurusan }}&lt;/td&gt;
+                &lt;td&gt;
+                    &lt;a href="{{ route('mahasiswa.edit', $mhs-&gt;id) }}"&gt;Ubah&lt;/a&gt;
+                    &lt;form action="{{ route('mahasiswa.destroy', $mhs-&gt;id) }}" method="POST"&gt;
+                        @csrf
+                        @method('DELETE')
+                        &lt;button type="submit"&gt;Hapus&lt;/button&gt;
+                    &lt;/form&gt;
+                &lt;/td&gt;
+            &lt;/tr&gt;
+        @empty
+            &lt;tr&gt;&lt;td colspan="5"&gt;Belum ada data mahasiswa.&lt;/td&gt;&lt;/tr&gt;
+        @endforelse
+    &lt;/tbody&gt;
+&lt;/table&gt;</code></pre>
+
+                <p class="kunci"><strong>Poin penilaian:</strong> project berjalan &middot; migration &amp; model benar &middot; route resource terdaftar &middot; 6 method controller lengkap &middot; validasi + <code>old()</code> &middot; form memakai <code>@csrf</code> &amp; <code>@method</code> &middot; seluruh fitur CRUD berhasil diuji.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOAL 2 -->
+    <div class="soal">
+        <div class="soal-header">
+            <span class="soal-number">2</span>
+            <h2>Jelaskan apa itu pola MVC pada Laravel, dan sebutkan folder tempat menyimpan Model, View, serta Controller pada project ini.</h2>
+        </div>
+        <div class="soal-body">
+            <span class="jawaban-label">Jawaban</span>
+            <div class="jawaban">
+                <p><span class="poin">MVC (Model–View–Controller)</span> adalah pola arsitektur yang memisahkan aplikasi menjadi tiga bagian agar kode lebih rapi dan mudah dirawat:</p>
+                <ul>
+                    <li><strong>Model</strong> &rarr; mengurus data dan logika database (Eloquent). Di project ini tersimpan di <code>app/Models/</code>.</li>
+                    <li><strong>View</strong> &rarr; mengurus tampilan (HTML). Di project ini menggunakan Blade dan tersimpan di <code>resources/views/</code>.</li>
+                    <li><strong>Controller</strong> &rarr; menjembatani Model dan View, menerima request lalu mengembalikan response. Tersimpan di <code>app/Http/Controllers/</code>.</li>
+                </ul>
+                <p>Alur request: <strong>Route &rarr; Controller &rarr; Model (ambil/simpan data) &rarr; View (tampilkan)</strong>.</p>
+<pre><code>app/
+├── Models/            → Mahasiswa.php, Kelas.php, Dosen.php, ...
+├── Http/Controllers/  → MahasiswaController.php, JadwalKuliahController.php, ...
+
+resources/
+└── views/             → mahasiswa/index.blade.php, mahasiswa/create.blade.php, ...</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOAL 3 -->
+    <div class="soal">
+        <div class="soal-header">
+            <span class="soal-number">3</span>
+            <h2>Apa fungsi Migration? Tuliskan potongan migration untuk membuat tabel <code>mahasiswa</code> minimal dengan kolom <code>nim</code>, <code>nama</code>, dan <code>jurusan</code>.</h2>
+        </div>
+        <div class="soal-body">
+            <span class="jawaban-label">Jawaban</span>
+            <div class="jawaban">
+                <p><span class="poin">Migration</span> adalah "kontrol versi" untuk struktur tabel database. Dengan migration, pembuatan tabel dilakukan lewat kode PHP sehingga bisa dijalankan berulang dan konsisten di komputer mana pun (cukup <code>php artisan migrate</code>).</p>
+                <p>Perintah membuatnya: <code>php artisan make:migration create_mahasiswa_table</code>.</p>
+<pre><code>&lt;?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('mahasiswa', function (Blueprint $table): void {
+            $table->id();
+            $table->string('nim', 20)-&gt;unique();
+            $table->string('nama', 100);
+            $table->string('jurusan', 100);
+            $table->timestamps();   // created_at & updated_at
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('mahasiswa');
+    }
+};</code></pre>
+                <p>Method <code>up()</code> dijalankan saat migrate (membuat tabel), sedangkan <code>down()</code> untuk membatalkan (rollback).</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOAL 4 -->
+    <div class="soal">
+        <div class="soal-header">
+            <span class="soal-number">4</span>
+            <h2>Apa fungsi <code>protected $fillable</code> pada Model? Jelaskan juga cara membuat relasi <em>belongsTo</em> dan <em>hasMany</em> antara Mahasiswa dan Kelas beserta contohnya.</h2>
+        </div>
+        <div class="soal-body">
+            <span class="jawaban-label">Jawaban</span>
+            <div class="jawaban">
+                <p><span class="poin">$fillable</span> adalah daftar kolom yang <strong>diizinkan</strong> diisi secara massal (<em>mass assignment</em>), misalnya lewat <code>Mahasiswa::create($validated)</code>. Tujuannya mencegah user mengirim kolom berbahaya yang tidak seharusnya bisa diubah.</p>
+                <p><span class="poin">Relasi Eloquent</span> menghubungkan antar tabel:</p>
+                <ul>
+                    <li><code>belongsTo</code> &rarr; sisi "milik" (satu mahasiswa memiliki satu kelas, kolom <code>kelas_id</code>).</li>
+                    <li><code>hasMany</code> &rarr; sisi "punya banyak" (satu kelas punya banyak mahasiswa).</li>
+                </ul>
+<pre><code>// app/Models/Mahasiswa.php
+class Mahasiswa extends Model
+{
+    protected $fillable = ['nim', 'nama', 'jurusan', 'email', 'angkatan', 'kelas_id'];
+
+    public function kelas(): BelongsTo
+    {
+        return $this-&gt;belongsTo(Kelas::class);   // Mahasiswa → Kelas
+    }
+}
+
+// app/Models/Kelas.php
+class Kelas extends Model
+{
+    public function mahasiswa(): HasMany
+    {
+        return $this-&gt;hasMany(Mahasiswa::class); // Kelas → banyak Mahasiswa
+    }
+}</code></pre>
+                <p>Relasi ini bisa dipakai dengan <em>eager loading</em>, contoh di controller: <code>Mahasiswa::with('kelas')-&gt;get()</code>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOAL 5 -->
+    <div class="soal">
+        <div class="soal-header">
+            <span class="soal-number">5</span>
+            <h2>Apa yang dihasilkan oleh <code>Route::resource()</code>? Bagaimana cara membatasi aksi tulis (create/store/edit/update/destroy) hanya boleh diakses role admin?</h2>
+        </div>
+        <div class="soal-body">
+            <span class="jawaban-label">Jawaban</span>
+            <div class="jawaban">
+                <p><span class="poin">Route::resource</span> otomatis membuat 7 route standar CRUD untuk satu controller (index, create, store, show, edit, update, destroy) sehingga kita tidak perlu menulis route satu per satu.</p>
+<pre><code>Route::resource('mahasiswa', MahasiswaController::class);</code></pre>
+                <p class="caption">Menghasilkan route: GET /mahasiswa (index), GET /mahasiswa/create (create), POST /mahasiswa (store), GET /mahasiswa/{id} (show), GET /mahasiswa/{id}/edit (edit), PUT/PATCH /mahasiswa/{id} (update), DELETE /mahasiswa/{id} (destroy).</p>
+                <p>Untuk membatasi akses, kita pakai <span class="poin">middleware</span>. Pada project ini route dipecah dua: <code>index</code>/<code>show</code> cukup <code>auth</code>, sedangkan aksi tulis ditambah <code>role:admin</code>.</p>
+<pre><code>Route::middleware('auth')-&gt;group(function () {
+    Route::resource('mahasiswa', MahasiswaController::class)
+        -&gt;except(['index', 'show'])
+        -&gt;middleware('role:admin');     // create, store, edit, update, destroy
+
+    Route::resource('mahasiswa', MahasiswaController::class)
+        -&gt;only(['index', 'show']);      // boleh dibaca semua user login
+});</code></pre>
+                <p>Dengan cara ini, user role <em>mahasiswa</em> hanya bisa melihat data, sedangkan <em>admin</em> bisa menambah, mengubah, dan menghapus.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOAL 6 -->
+    <div class="soal">
+        <div class="soal-header">
+            <span class="soal-number">6</span>
+            <h2>Jelaskan alur method <code>store()</code> pada sebuah CRUD, bagaimana validasi dijalankan, dan berikan contohnya. Sertakan juga bagaimana project ini menjaga agar jadwal tidak bentrok.</h2>
+        </div>
+        <div class="soal-body">
+            <span class="jawaban-label">Jawaban</span>
+            <div class="jawaban">
+                <p>Method <code>store()</code> menerima data dari form, memvalidasinya, menyimpan ke database lewat Model, lalu mengembalikan response (biasanya redirect).</p>
+                <ul>
+                    <li><strong>Validasi</strong> memakai <code>$request-&gt;validate([...])</code>. Jika gagal, Laravel otomatis mengembalikan user ke form beserta pesan error.</li>
+                    <li><code>Rule::unique()</code> memastikan <code>nim</code> tidak duplikat. Saat update dipakai <code>-&gt;ignore($id)</code> agar data miliknya sendiri tidak dianggap duplikat.</li>
+                    <li><strong>Redirect dengan pesan</strong> memakai <code>-&gt;with('success', '...')</code> untuk ditampilkan di halaman index.</li>
+                </ul>
+<pre><code>public function store(Request $request): RedirectResponse
+{
+    $validated = $request-&gt;validate([
+        'nim'      =&gt; ['required', 'string', 'max:20', Rule::unique('mahasiswa', 'nim')],
+        'nama'     =&gt; ['required', 'string', 'max:100'],
+        'jurusan'  =&gt; ['required', 'string', 'max:100'],
+        'angkatan' =&gt; ['required', 'integer', 'min:1900', 'max:2200'],
+        'kelas_id' =&gt; ['nullable', 'exists:kelas,id'],
+    ]);
+
+    Mahasiswa::create($validated);
+
+    return redirect()
+        -&gt;route('mahasiswa.index')
+        -&gt;with('success', 'Data mahasiswa berhasil ditambahkan.');
+}</code></pre>
+                <p><span class="poin">Validasi bentrok jadwal</span> (pada <code>JadwalKuliahController</code>) adalah validasi tambahan: sebelum menyimpan, sistem mengecek apakah ruangan, dosen, atau kelas sudah terpakai di hari &amp; jam yang sama menggunakan query <code>whereBetween</code>. Jika bentrok, ditolak dengan <code>withErrors()</code>.</p>
+<pre><code>$bentrokRuangan = JadwalKuliah::where('ruangan_id', $validated['ruangan_id'])
+    -&gt;where('hari', $validated['hari'])
+    -&gt;where(function ($query) use ($validated) {
+        $query-&gt;whereBetween('jam_mulai', [$validated['jam_mulai'], $validated['jam_selesai']])
+              -&gt;orWhereBetween('jam_selesai', [$validated['jam_mulai'], $validated['jam_selesai']]);
+    })
+    -&gt;exists();</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOAL 7 -->
+    <div class="soal">
+        <div class="soal-header">
+            <span class="soal-number">7</span>
+            <h2>Apa itu Blade Template? Jelaskan fungsi directive <code>{{ }}</code>, <code>@csrf</code>, <code>@method</code>, dan <code>@forelse</code>. Mengapa <code>@method('PUT')</code> atau <code>@method('DELETE')</code> diperlukan pada form HTML?</h2>
+        </div>
+        <div class="soal-body">
+            <span class="jawaban-label">Jawaban</span>
+            <div class="jawaban">
+                <p><span class="poin">Blade</span> adalah engine template bawaan Laravel. Kita bisa menulis HTML biasa ditambah directive untuk logika ringan. Beberapa directive penting:</p>
+                <ul>
+                    <li><code>{{ $nilai }}</code> &rarr; menampilkan data sekaligus <strong>otomatis meng-escape</strong> HTML (aman dari XSS).</li>
+                    <li><code>@csrf</code> &rarr; menyisipkan token CSRF untuk melindungi aplikasi dari serangan <em>Cross-Site Request Forgery</em>. Wajib ada pada setiap form POST/PUT/DELETE.</li>
+                    <li><code>@method('PUT')</code> &rarr; "menipu" method HTTP. Form HTML hanya mendukung GET dan POST, padahal Laravel punya route PUT/PATCH/DELETE. Directive ini menambahkan hidden input <code>_method</code> agar Laravel memperlakukannya sebagai PUT/DELETE.</li>
+                    <li><code>@forelse</code> &rarr; perulangan yang punya blok <code>@empty</code> untuk menangani kondisi data kosong.</li>
+                </ul>
+<pre><code>&lt;form action="{{ route('mahasiswa.destroy', $mhs-&gt;id) }}" method="POST"&gt;
+    @csrf
+    @method('DELETE')
+    &lt;button type="submit"&gt;Hapus&lt;/button&gt;
+&lt;/form&gt;
+
+@forelse ($mahasiswa as $mhs)
+    &lt;tr&gt;
+        &lt;td&gt;{{ $loop-&gt;iteration }}&lt;/td&gt;
+        &lt;td&gt;{{ $mhs-&gt;nama }}&lt;/td&gt;
+    &lt;/tr&gt;
+@empty
+    &lt;tr&gt;&lt;td colspan="7"&gt;Belum ada data mahasiswa.&lt;/td&gt;&lt;/tr&gt;
+@endforelse</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOAL 8 -->
+    <div class="soal">
+        <div class="soal-header">
+            <span class="soal-number">8</span>
+            <h2>Jelaskan bagaimana proses login bekerja di project ini. Tuliskan contoh method <code>login()</code> pada <code>AuthController</code> dan jelaskan fungsi <code>Auth::attempt()</code> serta <code>session()-&gt;regenerate()</code>.</h2>
+        </div>
+        <div class="soal-body">
+            <span class="jawaban-label">Jawaban</span>
+            <div class="jawaban">
+                <p>Proses login project ini:</p>
+                <ol>
+                    <li>User mengisi email &amp; password pada form (route <code>/login</code>).</li>
+                    <li>Data divalidasi, lalu dicek dengan <code>Auth::attempt($credentials)</code>.</li>
+                    <li>Jika cocok &rarr; session di-regenerate dan user diarahkan ke menu pertama yang boleh diaksesnya.</li>
+                    <li>Jika gagal &rarr; muncul pesan "Email atau password salah".</li>
+                </ol>
+<pre><code>public function login(Request $request): RedirectResponse
+{
+    $credentials = $request-&gt;validate([
+        'email'    =&gt; ['required', 'email'],
+        'password' =&gt; ['required'],
+    ]);
+
+    if (Auth::attempt($credentials, $request-&gt;boolean('remember'))) {
+        $request-&gt;session()-&gt;regenerate();   // cegah session fixation
+
+        return redirect()-&gt;intended(auth()-&gt;user()-&gt;firstAccessibleMenuUrl());
+    }
+
+    throw ValidationException::withMessages([
+        'email' =&gt; ['Email atau password salah.'],
+    ]);
+}</code></pre>
+                <ul>
+                    <li><code>Auth::attempt()</code> mencocokkan email &amp; password (password otomatis dicek terhadap hash) dan bila berhasil otomatis "mengenali" user pada session.</li>
+                    <li><code>session()-&gt;regenerate()</code> membuat ID session baru setelah login untuk mencegah <em>session fixation attack</em>.</li>
+                    <li><code>redirect()-&gt;intended()</code> mengarahkan user ke halaman yang tadinya ingin dibuka; pada project ini defaultnya ke <code>firstAccessibleMenuUrl()</code>.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOAL 9 -->
+    <div class="soal">
+        <div class="soal-header">
+            <span class="soal-number">9</span>
+            <h2>Apa yang dimaksud dengan RBAC (Role-Based Access Control)? Jelaskan konsep Role dan Permission, serta bagaimana penerapannya di project ini (termasuk RBAC berbasis menu).</h2>
+        </div>
+        <div class="soal-body">
+            <span class="jawaban-label">Jawaban</span>
+            <div class="jawaban">
+                <p><span class="poin">RBAC</span> adalah pengaturan hak akses berdasarkan <strong>peran</strong>. Di project ini memakai package <code>spatie/laravel-permission</code>.</p>
+                <ul>
+                    <li><strong>Permission</strong> &rarr; izin spesifik, misalnya <code>lihat-data</code>, <code>tambah-data</code>, atau permission menu seperti <code>menu-mahasiswa</code>.</li>
+                    <li><strong>Role</strong> &rarr; kumpulan permission yang diberikan ke user. Contoh: role <code>admin</code> mendapat semua permission, role <code>mahasiswa</code> hanya <code>lihat-data</code> + <code>menu-jadwal-kuliah</code>.</li>
+                </ul>
+                <p>Penerapannya:</p>
+                <ul>
+                    <li><strong>Model User</strong> memakai trait <code>HasRoles</code>.</li>
+                    <li><strong>Middleware</strong> membatasi route: <code>role:admin</code> dan <code>permission:menu-mahasiswa</code> (alias didaftarkan di <code>bootstrap/app.php</code>).</li>
+                    <li><strong>RBAC berbasis menu</strong>: daftar menu disimpan di <code>config/menu.php</code>, dan menu hanya ditampilkan jika user punya permission-nya.</li>
+                </ul>
+<pre><code>// config/menu.php
+'mahasiswa' =&gt; ['label' =&gt; 'Mahasiswa', 'permission' =&gt; 'menu-mahasiswa', 'route' =&gt; 'mahasiswa.index'],
+
+// resources/views/partials/nav.blade.php
+@foreach (config('menu') as $menu)
+    @can($menu['permission'])
+        &lt;a href="{{ route($menu['route']) }}"&gt;{{ $menu['label'] }}&lt;/a&gt;
+    @endcan
+@endforeach
+
+// routes/web.php
+Route::middleware('permission:menu-mahasiswa')-&gt;group(function () {
+    Route::resource('mahasiswa', MahasiswaController::class)-&gt;only(['index', 'show']);
+});</code></pre>
+                <p class="kunci"><strong>Kunci:</strong> menu yang muncul di navigasi &amp; route yang bisa diakses <em>sama-sama</em> dikunci oleh permission. Jadi selain disembunyikan di UI, akses langsung lewat URL pun tetap ditolak.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOAL 10 -->
+    <div class="soal">
+        <div class="soal-header">
+            <span class="soal-number">10</span>
+            <h2>Apa fungsi Seeder pada Laravel? Mengapa seeder sebaiknya bersifat <em>idempotent</em> (aman dijalankan berulang), dan bagaimana contohnya pada project ini?</h2>
+        </div>
+        <div class="soal-body">
+            <span class="jawaban-label">Jawaban</span>
+            <div class="jawaban">
+                <p><span class="poin">Seeder</span> adalah class untuk mengisi data awal/awal aplikasi ke database, misalnya role, permission, dan user default. Dijalankan dengan <code>php artisan db:seed</code> atau <code>php artisan migrate --seed</code>.</p>
+                <p>Seeder dibuat <strong>idempotent</strong> (menjalankan dua kali tidak menggandakan data) dengan <code>firstOrCreate()</code>. Jadi seeder aman dijalankan berulang tanpa membuat data duplikat — penting agar tidak terjadi error <em>unique constraint</em>.</p>
+<pre><code>class RolePermissionSeeder extends Seeder
+{
+    public function run(): void
+    {
+        app(PermissionRegistrar::class)-&gt;forgetCachedPermissions();
+
+        // idempotent: hanya dibuat jika belum ada
+        $roleAdmin = Role::firstOrCreate(['name' =&gt; 'admin']);
+        $roleAdmin-&gt;syncPermissions(['lihat-data', 'menu-mahasiswa', 'menu-dosen']);
+
+        $admin = User::firstOrCreate(
+            ['email' =&gt; 'admin@example.test'],   // kunci pencarian
+            ['name' =&gt; 'Administrator', 'password' =&gt; 'password'] // data jika belum ada
+        );
+        $admin-&gt;syncRoles(['admin']);
+    }
+}</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOAL 11 -->
+    <div class="soal">
+        <div class="soal-header">
+            <span class="soal-number">11</span>
+            <h2>Bagaimana cara menampilkan data dengan <em>pagination</em>? Jelaskan juga apa itu <em>Eager Loading</em> (<code>with()</code>) dan masalah N+1 query yang dihindarinya.</h2>
+        </div>
+        <div class="soal-body">
+            <span class="jawaban-label">Jawaban</span>
+            <div class="jawaban">
+                <p><span class="poin">Pagination</span> membatasi jumlah data per halaman. Di controller digunakan <code>paginate(10)</code>, sedangkan di view ditampilkan link halamannya dengan <code>-&gt;links()</code>.</p>
+                <ul>
+                    <li><code>withQueryString()</code> menjaga parameter filter pada URL tetap ikut saat pindah halaman.</li>
+                </ul>
+<pre><code>// Controller
+public function index(): View
+{
+    $mahasiswa = Mahasiswa::with('kelas')   // eager loading relasi kelas
+        -&gt;orderBy('id')
+        -&gt;paginate(10)
+        -&gt;withQueryString();
+
+    return view('mahasiswa.index', compact('mahasiswa'));
+}
+
+// View (mahasiswa/index.blade.php)
+{{ $mahasiswa-&gt;links() }}</code></pre>
+                <p><span class="poin">Eager Loading</span> memuat relasi sekaligus di awal, bukan satu per satu saat dipanggil di dalam loop. Tanpa <code>with('kelas')</code>, setiap baris tabel akan menembak query baru ke database (<em>N+1 problem</em>) — 1 query untuk daftar mahasiswa + N query untuk masing-masing kelasnya.</p>
+<pre><code>// Tanpa eager loading → N+1 (boros query)
+$mahasiswa = Mahasiswa::paginate(10);
+
+// Dengan eager loading → hanya 2 query total
+$mahasiswa = Mahasiswa::with('kelas')-&gt;paginate(10);</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <footer>
+        Soal UTS &middot; Simulasi Penjadwalan Kuliah (Laravel 12) &middot; Dibuat dari project <code>belajar-laravel</code>.
+    </footer>
+
+</div>
+</body>
+</html>
